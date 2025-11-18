@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const db = firebase.firestore();
 
   // Enable offline persistence (with mobile-friendly error handling)
-  db.enablePersistence({ synchronizeTabs: true })
+  db.enablePersistence()
     .catch((err) => {
       if (err.code == 'failed-precondition') {
         console.warn('Firestore persistence failed: Multiple tabs open');
