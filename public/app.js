@@ -566,23 +566,95 @@ document.addEventListener('DOMContentLoaded', function() {
       let errorCount = 0;
       const errors = [];
 
+      // Proper CSV parser that handles quoted fields
+      function parseCSVLine(line) {
+        const fields = [];
+        let current = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          const nextChar = line[i + 1];
+
+          if (char === '"') {
+            if (inQuotes && nextChar === '"') {
+              // Escaped quote
+              current += '"';
+              i++; // Skip next quote
+            } else {
+              // Toggle quote mode
+              inQuotes = !inQuotes;
+            }
+          } else if (char === ',' && !inQuotes) {
+            // Field separator
+            fields.push(current.trim());
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+
+        // Add last field
+        fields.push(current.trim());
+        return fields;
+      }
+
       for (let i = 0; i < dataLines.length; i++) {
         const line = dataLines[i].trim();
         if (!line) continue;
 
-        // Parse CSV line (simple parsing - assumes no commas in quoted fields)
-        const fields = line.split(',').map(f => f.trim());
-
-        if (fields.length < 7) {
-          errors.push(`Line ${i + 2}: Not enough fields`);
-          errorCount++;
-          continue;
-        }
-
-        const [name, phone, email, date, startTime, endTime, rinks, ...notesParts] = fields;
-        const notes = notesParts.join(','); // Rejoin notes in case they had commas
-
         try {
+          const fields = parseCSVLine(line);
+
+          if (fields.length < 7) {
+            errors.push(`Line ${i + 2}: Not enough fields (need at least 7: name,phone,email,date,startTime,endTime,rinks)`);
+            errorCount++;
+            continue;
+          }
+
+          const [name, phone, email, date, startTime, endTime, rinks, ...notesParts] = fields;
+          const notes = notesParts.join(',').trim(); // Rejoin notes in case they had commas
+
+          // Validate date format (must be YYYY-MM-DD)
+          const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+          if (!datePattern.test(date)) {
+            errors.push(`Line ${i + 2}: Invalid date format "${date}". Must be YYYY-MM-DD (e.g., 2025-12-01)`);
+            errorCount++;
+            continue;
+          }
+
+          // Validate time format (must be HH:MM)
+          const timePattern = /^\d{2}:\d{2}$/;
+          if (!timePattern.test(startTime)) {
+            errors.push(`Line ${i + 2}: Invalid start time "${startTime}". Must be HH:MM (e.g., 08:00, not 8:00)`);
+            errorCount++;
+            continue;
+          }
+          if (!timePattern.test(endTime)) {
+            errors.push(`Line ${i + 2}: Invalid end time "${endTime}". Must be HH:MM (e.g., 14:00, not 2:00 PM)`);
+            errorCount++;
+            continue;
+          }
+
+          // Validate required fields
+          if (!name || name.length < 2) {
+            errors.push(`Line ${i + 2}: Name is required and must be at least 2 characters`);
+            errorCount++;
+            continue;
+          }
+
+          if (!phone || phone.length < 8) {
+            errors.push(`Line ${i + 2}: Phone is required and must be at least 8 digits`);
+            errorCount++;
+            continue;
+          }
+
+          if (!rinks) {
+            errors.push(`Line ${i + 2}: Rinks field is required`);
+            errorCount++;
+            continue;
+          }
+
           await db.collection('bookings').add({
             name,
             phone,
@@ -612,6 +684,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
       if (errors.length > 0 && errors.length <= 5) {
         uploadStatus.textContent += '\n' + errors.join('\n');
+      } else if (errors.length > 5) {
+        uploadStatus.textContent += `\nFirst 5 errors:\n` + errors.slice(0, 5).join('\n');
       }
 
       csvUploadInput.value = '';

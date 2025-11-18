@@ -109,6 +109,13 @@
               <h3>Import Bookings (CSV)</h3>
               <p class="help-text">Upload a CSV file to create multiple bookings at once.</p>
               <p class="help-text"><strong>Format:</strong> name,phone,email,date,startTime,endTime,rinks,notes</p>
+              <p class="help-text"><strong>Example:</strong> John Smith,0212345678,john@email.com,2025-12-01,09:00,11:00,"1,2,3",Tournament</p>
+              <p class="help-text" style="color: #d32f2f;"><strong>Important:</strong></p>
+              <ul class="help-text" style="margin: 5px 0 5px 20px; font-size: 0.8em;">
+                <li>Date must be YYYY-MM-DD (e.g., 2025-12-01)</li>
+                <li>Times must be HH:MM with leading zeros (e.g., 08:00, not 8:00)</li>
+                <li>Put rinks in quotes if multiple: "1,2,3" not 1,2,3</li>
+              </ul>
               <input type="file" id="csv-upload" accept=".csv">
               <button id="upload-csv-btn">Upload CSV</button>
               <div class="csv-status" id="upload-status"></div>
