@@ -57,12 +57,24 @@ document.addEventListener('DOMContentLoaded', function() {
   const signinFormDiv = document.getElementById('signin-form');
   const resetFormDiv = document.getElementById('reset-form');
 
+  // Admin email - only this user sees Admin Tools
+  const ADMIN_EMAIL = 'jason.dean192@googlemail.com';
+
   // --- AUTHENTICATION --- //
   auth.onAuthStateChanged(user => {
     if (user) {
       app.style.display = 'block';
       authContainer.style.display = 'none';
       userEmail.textContent = user.email;
+
+      // Show admin tools only for admin user
+      const adminTools = document.getElementById('admin-tools');
+      if (user.email === ADMIN_EMAIL) {
+        adminTools.style.display = 'block';
+      } else {
+        adminTools.style.display = 'none';
+      }
+
       loadAllData();
     } else {
       app.style.display = 'none';
@@ -441,6 +453,177 @@ document.addEventListener('DOMContentLoaded', function() {
   todayBtn.addEventListener('click', () => { currentDate = new Date(); renderCalendar(); });
   closeModalBtn.addEventListener('click', () => { bookingModal.style.display = 'none'; });
   window.addEventListener('click', (e) => { if (e.target == bookingModal) bookingModal.style.display = 'none'; });
+
+  // --- CSV IMPORT/EXPORT (ADMIN ONLY) --- //
+  const uploadCsvBtn = document.getElementById('upload-csv-btn');
+  const csvUploadInput = document.getElementById('csv-upload');
+  const uploadStatus = document.getElementById('upload-status');
+  const downloadCsvBtn = document.getElementById('download-csv-btn');
+  const downloadStatus = document.getElementById('download-status');
+
+  // CSV Upload
+  uploadCsvBtn.addEventListener('click', async () => {
+    const file = csvUploadInput.files[0];
+    if (!file) {
+      uploadStatus.textContent = 'Please select a CSV file first.';
+      uploadStatus.style.color = '#f44336';
+      return;
+    }
+
+    const user = auth.currentUser;
+    if (!user) {
+      uploadStatus.textContent = 'You must be logged in.';
+      uploadStatus.style.color = '#f44336';
+      return;
+    }
+
+    uploadStatus.textContent = 'Processing CSV...';
+    uploadStatus.style.color = '#009688';
+
+    try {
+      const text = await file.text();
+      const lines = text.trim().split('\n');
+
+      // Skip header row
+      const dataLines = lines.slice(1);
+
+      let successCount = 0;
+      let errorCount = 0;
+      const errors = [];
+
+      for (let i = 0; i < dataLines.length; i++) {
+        const line = dataLines[i].trim();
+        if (!line) continue;
+
+        // Parse CSV line (simple parsing - assumes no commas in quoted fields)
+        const fields = line.split(',').map(f => f.trim());
+
+        if (fields.length < 7) {
+          errors.push(`Line ${i + 2}: Not enough fields`);
+          errorCount++;
+          continue;
+        }
+
+        const [name, phone, email, date, startTime, endTime, rinks, ...notesParts] = fields;
+        const notes = notesParts.join(','); // Rejoin notes in case they had commas
+
+        try {
+          await db.collection('bookings').add({
+            name,
+            phone,
+            email: email || '',
+            date,
+            startTime,
+            endTime,
+            rinks,
+            notes: notes || '',
+            uid: user.uid,
+            createdBy: user.email,
+            createdAt: new Date()
+          });
+          successCount++;
+        } catch (err) {
+          errors.push(`Line ${i + 2}: ${err.message}`);
+          errorCount++;
+        }
+      }
+
+      let statusMsg = `✓ ${successCount} bookings created`;
+      if (errorCount > 0) {
+        statusMsg += `, ${errorCount} failed`;
+      }
+      uploadStatus.textContent = statusMsg;
+      uploadStatus.style.color = errorCount > 0 ? '#ff9800' : '#4caf50';
+
+      if (errors.length > 0 && errors.length <= 5) {
+        uploadStatus.textContent += '\n' + errors.join('\n');
+      }
+
+      csvUploadInput.value = '';
+      loadAllData();
+    } catch (error) {
+      uploadStatus.textContent = 'Error: ' + error.message;
+      uploadStatus.style.color = '#f44336';
+    }
+  });
+
+  // CSV Download
+  downloadCsvBtn.addEventListener('click', () => {
+    const startDate = document.getElementById('export-start-date').value;
+    const endDate = document.getElementById('export-end-date').value;
+
+    if (!startDate || !endDate) {
+      downloadStatus.textContent = 'Please select both start and end dates.';
+      downloadStatus.style.color = '#f44336';
+      return;
+    }
+
+    if (startDate > endDate) {
+      downloadStatus.textContent = 'Start date must be before end date.';
+      downloadStatus.style.color = '#f44336';
+      return;
+    }
+
+    // Filter bookings by date range
+    const filteredBookings = bookings.filter(b => {
+      return b.date >= startDate && b.date <= endDate;
+    });
+
+    if (filteredBookings.length === 0) {
+      downloadStatus.textContent = 'No bookings found in this date range.';
+      downloadStatus.style.color = '#ff9800';
+      return;
+    }
+
+    // Generate CSV
+    const header = 'name,phone,email,date,startTime,endTime,rinks,notes,cancelled,cancelledBy,createdBy\n';
+    const rows = filteredBookings.map(b => {
+      const escapeCsv = (val) => {
+        if (!val) return '';
+        const str = String(val);
+        // Escape quotes and wrap in quotes if contains comma or quote
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+          return '"' + str.replace(/"/g, '""') + '"';
+        }
+        return str;
+      };
+
+      return [
+        escapeCsv(b.name),
+        escapeCsv(b.phone),
+        escapeCsv(b.email),
+        escapeCsv(b.date),
+        escapeCsv(b.startTime),
+        escapeCsv(b.endTime),
+        escapeCsv(b.rinks),
+        escapeCsv(b.notes),
+        b.cancelled ? 'Yes' : 'No',
+        escapeCsv(b.cancelledBy),
+        escapeCsv(b.createdBy)
+      ].join(',');
+    }).join('\n');
+
+    const csv = header + rows;
+
+    // Download file
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bookings_${startDate}_to_${endDate}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    downloadStatus.textContent = `✓ Downloaded ${filteredBookings.length} bookings`;
+    downloadStatus.style.color = '#4caf50';
+
+    // Clear status after 3 seconds
+    setTimeout(() => {
+      downloadStatus.textContent = '';
+    }, 3000);
+  });
 
   // Initial Load
   populateTimeSelects();

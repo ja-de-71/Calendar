@@ -371,3 +371,71 @@ footer {
   text-align: center;
   min-height: 20px;
 }
+
+/* Admin Tools Section */
+.admin-container {
+  background-color: #fff9e6;
+  border-left: 4px solid #ff9800;
+}
+
+.admin-container h2 {
+  color: #e65100;
+}
+
+.admin-section {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #ffe0b2;
+}
+
+.admin-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.admin-section h3 {
+  color: #f57c00;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+}
+
+.help-text {
+  font-size: 0.85em;
+  color: #666;
+  margin: 5px 0;
+}
+
+#csv-upload {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: white;
+}
+
+#upload-csv-btn, #download-csv-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #ff9800;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+#upload-csv-btn:hover, #download-csv-btn:hover {
+  background-color: #f57c00;
+}
+
+.csv-status {
+  margin-top: 10px;
+  font-size: 0.9em;
+  min-height: 20px;
+  white-space: pre-line;
+}

@@ -100,6 +100,32 @@
                 <button type="submit">Blackout Day</button>
             </form>
           </div>
+
+          <div id="admin-tools" class="admin-container form-section-container" style="display:none;">
+            <h2>Admin Tools</h2>
+
+            <div class="admin-section">
+              <h3>Import Bookings (CSV)</h3>
+              <p class="help-text">Upload a CSV file to create multiple bookings at once.</p>
+              <p class="help-text"><strong>Format:</strong> name,phone,email,date,startTime,endTime,rinks,notes</p>
+              <input type="file" id="csv-upload" accept=".csv">
+              <button id="upload-csv-btn">Upload CSV</button>
+              <div class="csv-status" id="upload-status"></div>
+            </div>
+
+            <div class="admin-section">
+              <h3>Export Bookings (CSV)</h3>
+              <p class="help-text">Download bookings for a specific date range.</p>
+              <label for="export-start-date">Start Date:</label>
+              <input type="date" id="export-start-date" required>
+
+              <label for="export-end-date">End Date:</label>
+              <input type="date" id="export-end-date" required>
+
+              <button id="download-csv-btn">Download CSV</button>
+              <div class="csv-status" id="download-status"></div>
+            </div>
+          </div>
       </div>
     </div>
 
