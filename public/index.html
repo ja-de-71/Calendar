@@ -60,28 +60,35 @@
       <div class="forms-wrapper">
           <div class="booking-container form-section-container">
               <h2>Make a Booking</h2>
-              <form id="booking-form">
+              <form id="booking-form" novalidate>
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" required minlength="2">
+                <div class="field-error" id="name-error"></div>
 
                 <label for="phone">Phone:</label>
                 <input type="tel" id="phone" name="phone" required pattern="[0-9]{8,10}">
+                <div class="field-error" id="phone-error"></div>
 
                 <label for="email">Email (optional):</label>
                 <input type="email" id="email" name="email">
+                <div class="field-error" id="email-error"></div>
 
                 <label for="date">Date:</label>
                 <input type="date" id="date" name="date" required>
+                <div class="field-error" id="date-error"></div>
 
                 <label for="start-time">Start Time:</label>
                 <select id="start-time" name="start-time" required></select>
+                <div class="field-error" id="start-time-error"></div>
 
                 <label for="end-time">End Time:</label>
                 <select id="end-time" name="end-time" required></select>
+                <div class="field-error" id="end-time-error"></div>
 
                 <label for="rinks">Rinks (max 8 available):</label>
                 <input type="text" id="rinks" name="rinks" placeholder="e.g., 1-4 or 1,2,5" required>
                 <small style="color: #666; font-size: 0.85em;">Enter rink numbers. Use ranges (1-4) or lists (1,2,5). Max 8 rinks total.</small>
+                <div class="field-error" id="rinks-error"></div>
 
                 <label for="notes">Notes:</label>
                 <textarea id="notes" name="notes" rows="3"></textarea>
@@ -154,6 +161,12 @@
 
   <!-- Success Toast Notification -->
   <div id="success-toast" class="toast"></div>
+
+  <!-- Loading Spinner -->
+  <div id="loading-spinner" class="loading-spinner" style="display:none;">
+    <div class="spinner"></div>
+    <div>Loading...</div>
+  </div>
 
   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>

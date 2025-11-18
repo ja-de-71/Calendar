@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const closeModalBtn = document.querySelector('.close-button');
   const successToast = document.getElementById('success-toast');
   const bookingSummaryEl = document.getElementById('booking-summary');
+  const loadingSpinner = document.getElementById('loading-spinner');
 
   // App state
   let currentDate = new Date();
@@ -243,21 +244,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- DATA LOADING --- //
   async function loadAllData() {
-    const bookingsSnapshot = await db.collection('bookings').orderBy('startTime').get();
-    bookings = bookingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    showLoading();
+    try {
+      const bookingsSnapshot = await db.collection('bookings').orderBy('startTime').get();
+      bookings = bookingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    const blackoutsSnapshot = await db.collection('blackouts').get();
-    blackouts = blackoutsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const blackoutsSnapshot = await db.collection('blackouts').get();
+      blackouts = blackoutsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    renderCalendar();
-    updateBookingSummary();
+      renderCalendar();
+      updateBookingSummary();
+    } finally {
+      hideLoading();
+    }
   }
 
   function showBookingModal(date) {
     modalBody.innerHTML = '';
     // Convert Date object to YYYY-MM-DD string for comparison
     const dateString = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
-    const dayBookings = bookings.filter(b => b.date === dateString);
+    const dayBookings = bookings.filter(b => b.date === dateString)
+      .sort((a, b) => a.startTime.localeCompare(b.startTime)); // Sort by start time
 
     dayBookings.forEach(booking => {
       const bookingEl = document.createElement('div');
@@ -294,6 +301,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- HELPER FUNCTIONS --- //
 
+  // Show/hide loading spinner
+  function showLoading() {
+    loadingSpinner.style.display = 'flex';
+  }
+
+  function hideLoading() {
+    loadingSpinner.style.display = 'none';
+  }
+
   // Show success toast notification
   function showSuccessToast(message) {
     successToast.textContent = message;
@@ -310,6 +326,42 @@ document.addEventListener('DOMContentLoaded', function() {
       return sum + parseRinks(b.rinks).length;
     }, 0);
     bookingSummaryEl.textContent = `Total Active Bookings: ${activeBookings.length} | Total Rinks Booked: ${totalRinks}`;
+  }
+
+  // Form validation
+  function validateField(fieldId, value, validationRules) {
+    const errorEl = document.getElementById(`${fieldId}-error`);
+    const inputEl = document.getElementById(fieldId);
+
+    for (const rule of validationRules) {
+      if (!rule.test(value)) {
+        errorEl.textContent = rule.message;
+        inputEl.classList.add('invalid');
+        inputEl.classList.remove('valid');
+        return false;
+      }
+    }
+
+    errorEl.textContent = '';
+    inputEl.classList.remove('invalid');
+    if (value) {
+      inputEl.classList.add('valid');
+    }
+    return true;
+  }
+
+  function clearFieldError(fieldId) {
+    const errorEl = document.getElementById(`${fieldId}-error`);
+    const inputEl = document.getElementById(fieldId);
+    if (errorEl) errorEl.textContent = '';
+    if (inputEl) {
+      inputEl.classList.remove('invalid');
+      inputEl.classList.remove('valid');
+    }
+  }
+
+  function clearAllErrors() {
+    ['name', 'phone', 'email', 'date', 'start-time', 'end-time', 'rinks'].forEach(clearFieldError);
   }
 
   // --- FORM HANDLING --- //
@@ -399,7 +451,44 @@ document.addEventListener('DOMContentLoaded', function() {
       notes: formData.get('notes'),
       uid: user.uid,
     };
-    
+
+    // Validate all fields
+    let isValid = true;
+
+    isValid &= validateField('name', bookingData.name, [
+      { test: v => v && v.length >= 2, message: 'Name must be at least 2 characters' }
+    ]);
+
+    isValid &= validateField('phone', bookingData.phone, [
+      { test: v => v && /^[0-9]{8,10}$/.test(v), message: 'Phone must be 8-10 digits' }
+    ]);
+
+    if (bookingData.email) {
+      isValid &= validateField('email', bookingData.email, [
+        { test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), message: 'Please enter a valid email' }
+      ]);
+    }
+
+    isValid &= validateField('date', bookingData.date, [
+      { test: v => v && v.length > 0, message: 'Date is required' }
+    ]);
+
+    isValid &= validateField('start-time', bookingData.startTime, [
+      { test: v => v && v.length > 0, message: 'Start time is required' }
+    ]);
+
+    isValid &= validateField('end-time', bookingData.endTime, [
+      { test: v => v && v.length > 0, message: 'End time is required' }
+    ]);
+
+    isValid &= validateField('rinks', bookingData.rinks, [
+      { test: v => v && v.trim().length > 0, message: 'Rinks field is required' }
+    ]);
+
+    if (!isValid) {
+      return; // Stop submission if validation fails
+    }
+
     // Prevent booking on a blacked out date
     // Simple string comparison to avoid timezone issues
     const isBlackedOut = blackouts.some(b => b.date === bookingData.date);
@@ -480,7 +569,38 @@ document.addEventListener('DOMContentLoaded', function() {
       currentEditId = null;
       formTitle.textContent = 'Make a Booking';
       bookingForm.querySelector('button[type="submit"]').textContent = 'Create Booking';
+      clearAllErrors();
   }
+
+  // --- REAL-TIME VALIDATION --- //
+  // Add blur event listeners for real-time validation
+  document.getElementById('name').addEventListener('blur', (e) => {
+    validateField('name', e.target.value, [
+      { test: v => v && v.length >= 2, message: 'Name must be at least 2 characters' }
+    ]);
+  });
+
+  document.getElementById('phone').addEventListener('blur', (e) => {
+    validateField('phone', e.target.value, [
+      { test: v => v && /^[0-9]{8,10}$/.test(v), message: 'Phone must be 8-10 digits' }
+    ]);
+  });
+
+  document.getElementById('email').addEventListener('blur', (e) => {
+    if (e.target.value) {
+      validateField('email', e.target.value, [
+        { test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), message: 'Please enter a valid email' }
+      ]);
+    } else {
+      clearFieldError('email');
+    }
+  });
+
+  document.getElementById('rinks').addEventListener('blur', (e) => {
+    validateField('rinks', e.target.value, [
+      { test: v => v && v.trim().length > 0, message: 'Rinks field is required' }
+    ]);
+  });
 
   // --- MODAL EVENT HANDLING --- //
   modalBody.addEventListener('click', async (e) => {
