@@ -184,6 +184,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const daysInMonth = lastDay.getDate();
     const startDay = firstDay.getDay();
 
+    // Add day of week headers
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    dayNames.forEach(dayName => {
+      const headerEl = document.createElement('div');
+      headerEl.classList.add('day-header');
+      headerEl.textContent = dayName;
+      calendarEl.appendChild(headerEl);
+    });
+
+    // Get today's date string for comparison
+    const today = new Date();
+    const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
     for (let i = 0; i < startDay; i++) {
       calendarEl.appendChild(document.createElement('div'));
     }
@@ -195,6 +208,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Format date as YYYY-MM-DD for consistent comparison
       const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+
+      // Highlight today's date
+      if (dateString === todayString) {
+        dayEl.classList.add('today');
+      }
 
       const blackout = blackouts.find(b => b.date === dateString);
 

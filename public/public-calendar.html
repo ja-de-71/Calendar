@@ -64,6 +64,16 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.12);
     }
 
+    .day-header {
+      background-color: #0059c4;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
     .calendar-day {
       background-color: #e6f2ff;
       border: 1px solid #b3d9ff;
@@ -73,11 +83,20 @@
       font-size: 0.85em;
     }
 
+    .calendar-day.today {
+      border: 3px solid #ff9800;
+      box-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
+    }
+
     .day-number {
       font-weight: bold;
       font-size: 1.2em;
       margin-bottom: 5px;
       color: #0059c4;
+    }
+
+    .calendar-day.today .day-number {
+      color: #ff9800;
     }
 
     .calendar-day.has-bookings {
@@ -184,6 +203,19 @@
       const daysInMonth = lastDay.getDate();
       const startDay = firstDay.getDay();
 
+      // Add day of week headers
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      dayNames.forEach(dayName => {
+        const headerEl = document.createElement('div');
+        headerEl.classList.add('day-header');
+        headerEl.textContent = dayName;
+        calendarEl.appendChild(headerEl);
+      });
+
+      // Get today's date string for comparison
+      const today = new Date();
+      const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
       // Empty cells for days before month starts
       for (let i = 0; i < startDay; i++) {
         calendarEl.appendChild(document.createElement('div'));
@@ -197,6 +229,11 @@
 
         // Format date as YYYY-MM-DD for consistent comparison
         const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+
+        // Highlight today's date
+        if (dateString === todayString) {
+          dayEl.classList.add('today');
+        }
 
         // Check for blackouts
         const blackout = blackouts.find(b => b.date === dateString);

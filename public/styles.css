@@ -84,6 +84,16 @@ body {
   box-shadow: 0 1px 3px rgba(0,0,0,0.12);
 }
 
+.day-header {
+  background-color: #0059c4;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
 .calendar-day {
   background-color: #e6f2ff; /* Light blue */
   border: 1px solid #b3d9ff; /* Light blue border */
@@ -95,10 +105,19 @@ body {
   transition: background-color 0.3s;
 }
 
+.calendar-day.today {
+  border: 3px solid #ff9800;
+  box-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
+}
+
 .calendar-day .day-number {
   font-weight: bold;
   font-size: 1.2em;
   margin-bottom: 5px;
+}
+
+.calendar-day.today .day-number {
+  color: #ff9800;
 }
 
 .calendar-day.has-bookings {
