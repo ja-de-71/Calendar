@@ -216,8 +216,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (bookingsForDay.length > 0) {
           dayEl.classList.add('has-bookings');
-          const bookingList = bookingsForDay.map(b => 
-            `<div class="booking-summary">${b.startTime} (${parseRinks(b.rinks).length} rinks)</div>`
+          const bookingList = bookingsForDay.map(b =>
+            `<div class="booking-summary">${b.startTime} - ${b.endTime} (${parseRinks(b.rinks).length} rinks)</div>`
           ).join('');
           dayEl.innerHTML += bookingList;
           dayEl.addEventListener('click', () => showBookingModal(date));
