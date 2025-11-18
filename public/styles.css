@@ -547,3 +547,163 @@ input.invalid, select.invalid, textarea.invalid {
 input.valid, select.valid {
   border-color: #4caf50;
 }
+
+/* Search Container */
+.search-container {
+  background-color: #f5f5f5;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.search-container input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.95em;
+}
+
+.search-container input:focus {
+  outline: none;
+  border-color: #0078d4;
+  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.1);
+}
+
+.search-container button {
+  padding: 10px 20px;
+  background-color: #666;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+  white-space: nowrap;
+}
+
+.search-container button:hover {
+  background-color: #555;
+}
+
+/* Highlight search matches on calendar */
+.calendar-day.search-match {
+  border: 2px solid #4caf50;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  /* Stack main container vertically */
+  .container {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Make calendar and forms full width */
+  .calendar-container,
+  .booking-container,
+  .blackout-container,
+  .admin-container {
+    min-width: 100%;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  /* Smaller app header */
+  .app-header {
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+  }
+
+  .app-header h1 {
+    font-size: 1.2em;
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    text-align: center;
+  }
+
+  /* Compact calendar navigation */
+  .calendar-nav {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .calendar-nav h2 {
+    font-size: 1.2em;
+    margin: 0 5px;
+    flex-basis: 100%;
+    text-align: center;
+  }
+
+  .calendar-nav button {
+    padding: 6px 10px;
+    font-size: 0.9em;
+  }
+
+  /* Adjust calendar grid for mobile */
+  .calendar {
+    gap: 3px;
+    padding: 5px;
+  }
+
+  .calendar-day {
+    min-height: 80px;
+    padding: 4px;
+    font-size: 0.7em;
+  }
+
+  .day-header {
+    padding: 6px;
+    font-size: 0.75em;
+  }
+
+  .booking-summary {
+    font-size: 0.7em;
+    padding: 1px 2px;
+  }
+
+  /* Compact search on mobile */
+  .search-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .search-container button {
+    width: 100%;
+  }
+
+  /* Forms on mobile */
+  .form-section-container {
+    padding: 15px;
+  }
+
+  /* Modal adjustments */
+  .modal-content {
+    width: 95%;
+    max-width: 95%;
+    padding: 20px;
+  }
+
+  /* Booking actions stack vertically on mobile */
+  .booking-actions {
+    flex-direction: column;
+  }
+
+  .booking-actions .edit-btn,
+  .booking-actions .cancel-btn {
+    width: 100%;
+  }
+}

@@ -47,12 +47,15 @@ document.addEventListener('DOMContentLoaded', function() {
   const successToast = document.getElementById('success-toast');
   const bookingSummaryEl = document.getElementById('booking-summary');
   const loadingSpinner = document.getElementById('loading-spinner');
+  const searchInput = document.getElementById('search-bookings');
+  const clearSearchBtn = document.getElementById('clear-search');
 
   // App state
   let currentDate = new Date();
   let bookings = [];
   let blackouts = []; // For storing blackout dates
   let currentEditId = null;
+  let searchQuery = ''; // Track current search query
 
   // Auth form elements
   const signinForm = document.getElementById('signin');
@@ -235,7 +238,35 @@ document.addEventListener('DOMContentLoaded', function() {
             `<div class="booking-summary">${b.startTime} - ${b.endTime} (${parseRinks(b.rinks).length} rinks)</div>`
           ).join('');
           dayEl.innerHTML += bookingList;
-          dayEl.addEventListener('click', () => showBookingModal(date));
+
+          // Add click handler with availability view option (shift+click or right click)
+          dayEl.addEventListener('click', (e) => {
+            if (e.shiftKey) {
+              showAvailabilityView(date);
+            } else {
+              showBookingModal(date);
+            }
+          });
+          dayEl.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            showAvailabilityView(date);
+          });
+
+          // Check if day matches search query
+          if (searchQuery) {
+            const matchesSearch = bookingsForDay.some(b => {
+              const searchLower = searchQuery.toLowerCase();
+              return b.name.toLowerCase().includes(searchLower) ||
+                     b.phone.includes(searchQuery);
+            });
+            if (matchesSearch) {
+              dayEl.classList.add('search-match');
+            }
+          }
+        } else {
+          // Allow clicking on empty days to see availability
+          dayEl.style.cursor = 'pointer';
+          dayEl.addEventListener('click', () => showAvailabilityView(date));
         }
       }
       calendarEl.appendChild(dayEl);
@@ -297,6 +328,75 @@ document.addEventListener('DOMContentLoaded', function() {
       modalBody.appendChild(bookingEl);
     });
     bookingModal.style.display = 'flex';
+  }
+
+  // Show availability view for a specific date
+  function showAvailabilityView(date) {
+    modalBody.innerHTML = '';
+    const dateString = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+    const dayBookings = bookings.filter(b => b.date === dateString && !b.cancelled)
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+    // Create availability grid by hour
+    const availabilityHTML = `
+      <h3>Rink Availability - ${new Date(date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h3>
+      <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">Shows which rinks (1-8) are available throughout the day</p>
+      <div style="max-height: 400px; overflow-y: auto;">
+        ${generateAvailabilityGrid(dayBookings)}
+      </div>
+    `;
+
+    modalBody.innerHTML = availabilityHTML;
+    bookingModal.style.display = 'flex';
+  }
+
+  // Generate availability grid showing which rinks are free at each time
+  function generateAvailabilityGrid(dayBookings) {
+    const hours = [];
+    for (let h = 6; h < 22; h++) { // 6 AM to 10 PM
+      hours.push(`${h.toString().padStart(2, '0')}:00`);
+    }
+
+    let html = '<table style="width: 100%; border-collapse: collapse; font-size: 0.85em;">';
+    html += '<thead><tr><th style="border: 1px solid #ddd; padding: 8px; background-color: #0059c4; color: white;">Time</th>';
+
+    // Header row with rink numbers
+    for (let r = 1; r <= 8; r++) {
+      html += `<th style="border: 1px solid #ddd; padding: 8px; background-color: #0059c4; color: white;">R${r}</th>`;
+    }
+    html += '</tr></thead><tbody>';
+
+    // For each hour, check availability
+    hours.forEach(hour => {
+      html += `<tr><td style="border: 1px solid #ddd; padding: 8px; font-weight: bold; background-color: #f5f5f5;">${hour}</td>`;
+
+      for (let rinkNum = 1; rinkNum <= 8; rinkNum++) {
+        // Check if this rink is booked at this time
+        const isBooked = dayBookings.some(booking => {
+          const bookingRinks = parseRinks(booking.rinks);
+          const bookingStartHour = booking.startTime.split(':')[0];
+          const bookingEndHour = booking.endTime.split(':')[0];
+          const currentHour = hour.split(':')[0];
+
+          // Check if rink is in booking and time overlaps
+          return bookingRinks.includes(rinkNum) &&
+                 currentHour >= bookingStartHour &&
+                 currentHour < bookingEndHour;
+        });
+
+        const cellStyle = isBooked
+          ? 'border: 1px solid #ddd; padding: 8px; background-color: #ffcdd2; color: #c62828; text-align: center;'
+          : 'border: 1px solid #ddd; padding: 8px; background-color: #c8e6c9; color: #2e7d32; text-align: center;';
+        const cellContent = isBooked ? '✗' : '✓';
+
+        html += `<td style="${cellStyle}">${cellContent}</td>`;
+      }
+
+      html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    return html;
   }
 
   // --- HELPER FUNCTIONS --- //
@@ -693,6 +793,18 @@ document.addEventListener('DOMContentLoaded', function() {
   todayBtn.addEventListener('click', () => { currentDate = new Date(); renderCalendar(); });
   closeModalBtn.addEventListener('click', () => { bookingModal.style.display = 'none'; });
   window.addEventListener('click', (e) => { if (e.target == bookingModal) bookingModal.style.display = 'none'; });
+
+  // --- SEARCH/FILTER FUNCTIONALITY --- //
+  searchInput.addEventListener('input', (e) => {
+    searchQuery = e.target.value.trim();
+    renderCalendar();
+  });
+
+  clearSearchBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    searchQuery = '';
+    renderCalendar();
+  });
 
   // --- CSV IMPORT/EXPORT (ADMIN ONLY) --- //
   const uploadCsvBtn = document.getElementById('upload-csv-btn');
