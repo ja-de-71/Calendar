@@ -284,7 +284,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const bookingEl = document.createElement('div');
       bookingEl.classList.add('booking-entry');
       let buttonsHTML = '';
-      if (auth.currentUser && auth.currentUser.uid === booking.uid && !booking.cancelled) {
+      // Show buttons if: user is signed in AND booking is not cancelled AND (booking has no uid OR user owns the booking)
+      const canEdit = auth.currentUser && !booking.cancelled && (!booking.uid || auth.currentUser.uid === booking.uid);
+      if (canEdit) {
         buttonsHTML = `
           <div class="booking-actions">
             <button class="edit-btn" data-id="${booking.id}">Edit</button>
