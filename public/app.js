@@ -357,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
         bookingData.createdAt = new Date();
         await db.collection('bookings').add(bookingData);
       }
-      resetForm();
+      resetBookingForm();
       loadAllData();
     } catch (error) {
       console.error("Error saving document: ", error);
@@ -387,7 +387,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  function resetForm() {
+  function resetBookingForm() {
       bookingForm.reset();
       currentEditId = null;
       formTitle.textContent = 'Make a Booking';
