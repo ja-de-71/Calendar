@@ -44,6 +44,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const bookingModal = document.getElementById('booking-modal');
   const modalBody = document.getElementById('modal-body');
   const closeModalBtn = document.querySelector('.close-button');
+  const successToast = document.getElementById('success-toast');
+  const bookingSummaryEl = document.getElementById('booking-summary');
 
   // App state
   let currentDate = new Date();
@@ -246,8 +248,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const blackoutsSnapshot = await db.collection('blackouts').get();
     blackouts = blackoutsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
+
     renderCalendar();
+    updateBookingSummary();
   }
 
   function showBookingModal(date) {
@@ -287,6 +290,26 @@ document.addEventListener('DOMContentLoaded', function() {
       modalBody.appendChild(bookingEl);
     });
     bookingModal.style.display = 'flex';
+  }
+
+  // --- HELPER FUNCTIONS --- //
+
+  // Show success toast notification
+  function showSuccessToast(message) {
+    successToast.textContent = message;
+    successToast.classList.add('show');
+    setTimeout(() => {
+      successToast.classList.remove('show');
+    }, 3000);
+  }
+
+  // Update booking count summary
+  function updateBookingSummary() {
+    const activeBookings = bookings.filter(b => !b.cancelled);
+    const totalRinks = activeBookings.reduce((sum, b) => {
+      return sum + parseRinks(b.rinks).length;
+    }, 0);
+    bookingSummaryEl.textContent = `Total Active Bookings: ${activeBookings.length} | Total Rinks Booked: ${totalRinks}`;
   }
 
   // --- FORM HANDLING --- //
@@ -414,10 +437,12 @@ document.addEventListener('DOMContentLoaded', function() {
         bookingData.updatedBy = user.email;
         bookingData.updatedAt = new Date();
         await db.collection('bookings').doc(currentEditId).update(bookingData);
+        showSuccessToast('Booking updated successfully!');
       } else {
         bookingData.createdBy = user.email;
         bookingData.createdAt = new Date();
         await db.collection('bookings').add(bookingData);
+        showSuccessToast('Booking created successfully!');
       }
       resetBookingForm();
       loadAllData();
@@ -441,6 +466,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     try {
         await db.collection('blackouts').add({ date, reason, createdBy: user.email, createdAt: new Date() });
+        showSuccessToast('Day blacked out successfully!');
         blackoutForm.reset();
         loadAllData();
     } catch (error) {
@@ -470,6 +496,7 @@ document.addEventListener('DOMContentLoaded', function() {
               cancelledBy: cancellerName.trim(),
               cancelledAt: new Date()
           });
+          showSuccessToast('Booking cancelled successfully!');
           bookingModal.style.display = 'none';
           loadAllData();
         } catch (error) {
