@@ -282,16 +282,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- FORM HANDLING --- //
 
-  // Check for rink conflicts
-  function checkRinkConflicts(date, startTime, endTime, rinks, excludeBookingId = null) {
+  // Check for rink conflicts - reloads data from Firestore to ensure accuracy
+  async function checkRinkConflicts(date, startTime, endTime, rinks, excludeBookingId = null) {
     // Parse the rinks being requested
     const requestedRinks = parseRinks(rinks);
 
+    if (requestedRinks.length === 0) {
+      return {
+        conflict: true,
+        message: 'Please enter valid rink numbers (e.g., 1, 1-4, or 1,2,5)'
+      };
+    }
+
+    // Check if any requested rinks are out of range (only 8 rinks available)
+    const invalidRinks = requestedRinks.filter(r => r < 1 || r > 8);
+    if (invalidRinks.length > 0) {
+      return {
+        conflict: true,
+        message: `Invalid rink number(s): ${invalidRinks.join(', ')}. Only rinks 1-8 are available.`
+      };
+    }
+
+    // Check if trying to book more than 8 rinks total
+    if (requestedRinks.length > 8) {
+      return {
+        conflict: true,
+        message: `You cannot book more than 8 rinks. You requested ${requestedRinks.length} rinks.`
+      };
+    }
+
+    // Reload bookings from Firestore to get the latest data
+    const bookingsSnapshot = await db.collection('bookings').where('date', '==', date).get();
+    const latestBookings = bookingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
     // Get all non-cancelled bookings for this date
-    const dayBookings = bookings.filter(b => {
+    const dayBookings = latestBookings.filter(b => {
       if (b.cancelled) return false;
       if (b.id === excludeBookingId) return false; // Exclude current booking when editing
-      return b.date === date;
+      return true;
     });
 
     // Check each booking for time and rink conflicts
@@ -357,8 +385,8 @@ document.addEventListener('DOMContentLoaded', function() {
       return alert('End time must be after start time.');
     }
 
-    // Check for rink conflicts
-    const conflictCheck = checkRinkConflicts(
+    // Check for rink conflicts (reloads latest data from Firestore)
+    const conflictCheck = await checkRinkConflicts(
       bookingData.date,
       bookingData.startTime,
       bookingData.endTime,
@@ -367,6 +395,9 @@ document.addEventListener('DOMContentLoaded', function() {
     );
 
     if (conflictCheck.conflict) {
+      if (conflictCheck.message) {
+        return alert(conflictCheck.message);
+      }
       const rinkList = conflictCheck.rinks.join(', ');
       return alert(
         `Rink conflict! Rink(s) ${rinkList} are already booked from ${conflictCheck.time}.\n\n` +

@@ -78,8 +78,9 @@
                 <label for="end-time">End Time:</label>
                 <select id="end-time" name="end-time" required></select>
 
-                <label for="rinks">Rinks (e.g., 1, 1-4, 1,2,5):</label>
-                <input type="text" id="rinks" name="rinks" required>
+                <label for="rinks">Rinks (max 8 available):</label>
+                <input type="text" id="rinks" name="rinks" placeholder="e.g., 1-4 or 1,2,5" required>
+                <small style="color: #666; font-size: 0.85em;">Enter rink numbers. Use ranges (1-4) or lists (1,2,5). Max 8 rinks total.</small>
 
                 <label for="notes">Notes:</label>
                 <textarea id="notes" name="notes" rows="3"></textarea>
