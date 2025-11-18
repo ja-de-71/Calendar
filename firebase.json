@@ -5,6 +5,26 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(html|js)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(css|jpg|jpeg|gif|png)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=300"
+          }
+        ]
+      }
     ]
   },
   "firestore": {
