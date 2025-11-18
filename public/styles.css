@@ -12,7 +12,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #00796b; /* Darker teal */
+  background-color: #0059c4; /* Primary blue */
   color: white;
   padding: 10px 20px;
   border-radius: 8px;
@@ -61,7 +61,7 @@ body {
 }
 
 .calendar-nav button {
-  background-color: #009688; /* Teal */
+  background-color: #0078d4; /* Medium blue */
   color: white;
   border: none;
   padding: 8px 12px;
@@ -71,7 +71,7 @@ body {
 }
 
 .calendar-nav button:hover {
-  background-color: #00796b; /* Darker teal */
+  background-color: #0059c4; /* Primary blue */
 }
 
 .calendar {
@@ -85,8 +85,8 @@ body {
 }
 
 .calendar-day {
-  background-color: #e0f2f1; /* Light teal */
-  border: 1px solid #b2dfdb; /* Lighter teal border */
+  background-color: #e6f2ff; /* Light blue */
+  border: 1px solid #b3d9ff; /* Light blue border */
   min-height: 120px; /* Increased height */
   padding: 8px;
   border-radius: 4px;
@@ -102,19 +102,19 @@ body {
 }
 
 .calendar-day.has-bookings {
-    background-color: #a7ffeb; /* Mint green */
+    background-color: #cce5ff; /* Light blue for bookings */
     cursor: pointer;
 }
 
 .calendar-day.has-bookings:hover {
-    background-color: #80cbc4; /* Darker mint */
+    background-color: #99ccff; /* Darker blue hover */
 }
 
 .booking-summary {
     font-size: 0.85em;
     margin-top: 4px;
-    color: #004d40;
-    background-color: #d0e0e3;
+    color: #003d7a;
+    background-color: #d9e9ff;
     padding: 2px 4px;
     border-radius: 3px;
     margin-bottom: 3px;
@@ -144,7 +144,7 @@ body {
 
 .form-section-container h2 {
     margin-top: 0;
-    color: #00796b;
+    color: #0059c4;
 }
 
 .booking-container {
@@ -180,7 +180,7 @@ body {
 }
 
 #booking-form button, #blackout-form button {
-  background-color: #009688; /* Teal */
+  background-color: #0078d4; /* Medium blue */
   color: white;
   border: none;
   cursor: pointer;
@@ -190,7 +190,7 @@ body {
 }
 
 #booking-form button:hover, #blackout-form button:hover {
-  background-color: #00796b; /* Darker teal */
+  background-color: #0059c4; /* Primary blue */
 }
 
 /* Footer */
@@ -269,7 +269,7 @@ footer {
 }
 
 .booking-actions .edit-btn {
-  background-color: #009688; /* Teal */
+  background-color: #0078d4; /* Medium blue */
 }
 
 .booking-actions .cancel-btn {
@@ -282,7 +282,7 @@ footer {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #00796b 0%, #009688 100%);
+  background: linear-gradient(135deg, #0059c4 0%, #0078d4 100%);
 }
 
 .auth-wrapper {
@@ -296,13 +296,13 @@ footer {
 
 .auth-wrapper h1 {
   text-align: center;
-  color: #00796b;
+  color: #0059c4;
   margin-bottom: 30px;
   font-size: 1.8em;
 }
 
 .auth-form h2 {
-  color: #00796b;
+  color: #0059c4;
   margin-bottom: 20px;
   text-align: center;
 }
@@ -319,14 +319,14 @@ footer {
 
 .auth-form input:focus {
   outline: none;
-  border-color: #009688;
-  box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.1);
+  border-color: #0078d4;
+  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.1);
 }
 
 .auth-form button {
   width: 100%;
   padding: 12px;
-  background-color: #009688;
+  background-color: #0078d4;
   color: white;
   border: none;
   border-radius: 6px;
@@ -337,7 +337,7 @@ footer {
 }
 
 .auth-form button:hover {
-  background-color: #00796b;
+  background-color: #0059c4;
 }
 
 .auth-toggle {
@@ -347,7 +347,7 @@ footer {
 }
 
 .auth-toggle a {
-  color: #009688;
+  color: #0078d4;
   text-decoration: none;
   font-weight: bold;
 }
