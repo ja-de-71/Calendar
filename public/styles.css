@@ -1,0 +1,277 @@
+/* General Body and Typography */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f4f7f6;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+}
+
+/* App Header */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #00796b; /* Darker teal */
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+.user-info a {
+  color: #ffffff;
+  text-decoration: none;
+  margin-left: 15px;
+}
+
+.user-info a:hover {
+  text-decoration: underline;
+}
+
+
+/* Main Layout Container */
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+/* Calendar Styling */
+.calendar-container {
+  flex: 3;
+  min-width: 500px;
+}
+
+.calendar-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.calendar-nav h2 {
+    margin: 0 15px;
+}
+
+.calendar-nav button {
+  background-color: #009688; /* Teal */
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.calendar-nav button:hover {
+  background-color: #00796b; /* Darker teal */
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  background-color: #ffffff;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.calendar-day {
+  background-color: #e0f2f1; /* Light teal */
+  border: 1px solid #b2dfdb; /* Lighter teal border */
+  min-height: 120px; /* Increased height */
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  position: relative;
+  transition: background-color 0.3s;
+}
+
+.calendar-day .day-number {
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-bottom: 5px;
+}
+
+.calendar-day.has-bookings {
+    background-color: #a7ffeb; /* Mint green */
+    cursor: pointer;
+}
+
+.calendar-day.has-bookings:hover {
+    background-color: #80cbc4; /* Darker mint */
+}
+
+.booking-summary {
+    font-size: 0.85em;
+    margin-top: 4px;
+    color: #004d40;
+    background-color: #d0e0e3;
+    padding: 2px 4px;
+    border-radius: 3px;
+    margin-bottom: 3px;
+}
+
+/* Blackout Day Styling */
+.day-blackout {
+    background-color: #616161; /* Dark Grey */
+    color: white;
+}
+
+.blackout-reason {
+    font-weight: bold;
+    font-size: 1.1em;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Form Container Unified Styles */
+.form-section-container {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    margin-bottom: 20px;
+}
+
+.form-section-container h2 {
+    margin-top: 0;
+    color: #00796b;
+}
+
+.booking-container {
+  flex: 1;
+  min-width: 300px;
+  max-width: 400px; /* Narrower form */
+  margin: 0 auto; /* Centered */
+}
+
+.blackout-container {
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+    margin: 20px auto 0;
+}
+
+
+#booking-form label, #blackout-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+#booking-form input, #booking-form select, #booking-form textarea, #booking-form button,
+#blackout-form input, #blackout-form button {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+#booking-form button, #blackout-form button {
+  background-color: #009688; /* Teal */
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1em;
+  font-weight: bold;
+}
+
+#booking-form button:hover, #blackout-form button:hover {
+  background-color: #00796b; /* Darker teal */
+}
+
+/* Footer */
+footer {
+  width: 100%;
+  text-align: center;
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #37474f; /* Dark grey */
+  color: white;
+  border-radius: 8px;
+}
+
+
+/* Modal Styling */
+.modal {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Styling for individual booking entries inside the modal */
+.booking-entry {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
+.booking-entry:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Styling for the Edit/Cancel buttons in the modal */
+.booking-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.booking-actions .edit-btn,
+.booking-actions .cancel-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+}
+
+.booking-actions .edit-btn {
+  background-color: #009688; /* Teal */
+}
+
+.booking-actions .cancel-btn {
+  background-color: #f44336; /* Red */
+}

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portland Memorial Bowls Calendar</title>
+  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.8.1/firebase-ui-auth.css" />
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div id="firebaseui-auth-container"></div>
+
+  <div id="app" style="display:none;">
+    <header class="app-header">
+      <h1>Portland Memorial Bowls Calendar</h1>
+      <div class="user-info">
+        <span id="user-email"></span>
+        <a href="#" id="sign-out">Sign Out</a>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="calendar-container">
+        <div class="calendar-nav">
+          <button id="prev-month">&lt;</button>
+          <h2 id="month-year"></h2>
+          <button id="next-month">&gt;</button>
+          <button id="today">Today</button>
+        </div>
+        <div class="calendar" id="calendar"></div>
+      </div>
+
+      <div class="forms-wrapper">
+          <div class="booking-container form-section-container">
+              <h2>Make a Booking</h2>
+              <form id="booking-form">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required minlength="2">
+
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" name="phone" required pattern="[0-9]{8,10}">
+
+                <label for="email">Email (optional):</label>
+                <input type="email" id="email" name="email">
+
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" required>
+
+                <label for="start-time">Start Time:</label>
+                <select id="start-time" name="start-time" required></select>
+
+                <label for="end-time">End Time:</label>
+                <select id="end-time" name="end-time" required></select>
+
+                <label for="rinks">Rinks (e.g., 1, 1-4, 1,2,5):</label>
+                <input type="text" id="rinks" name="rinks" required>
+
+                <label for="notes">Notes:</label>
+                <textarea id="notes" name="notes" rows="3"></textarea>
+
+                <button type="submit">Create Booking</button>
+              </form>
+          </div>
+
+          <div class="blackout-container form-section-container">
+            <h2>Blackout a Day</h2>
+            <form id="blackout-form">
+                <label for="blackout-date">Date to Blackout:</label>
+                <input type="date" id="blackout-date" name="blackout-date" required>
+
+                <label for="blackout-reason">Reason:</label>
+                <input type="text" id="blackout-reason" name="blackout-reason" placeholder="e.g., Maintenance" required>
+
+                <button type="submit">Blackout Day</button>
+            </form>
+          </div>
+      </div>
+    </div>
+
+    <footer>
+      Created by Jason Dean Consulting Copyright 2025 - v0.7.5
+    </footer>
+  </div>
+
+  <!-- Booking Detail Modal -->
+  <div id="booking-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2>Booking Details</h2>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/ui/4.8.1/firebase-ui-auth.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
