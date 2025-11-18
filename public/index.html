@@ -104,6 +104,31 @@
                 <label for="notes">Notes:</label>
                 <textarea id="notes" name="notes" rows="3"></textarea>
 
+                <!-- Recurring Booking Options -->
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+                  <label style="display: flex; align-items: center; cursor: pointer; font-weight: bold;">
+                    <input type="checkbox" id="recurring-enabled" style="margin-right: 10px; width: auto;">
+                    Make this a recurring booking
+                  </label>
+
+                  <div id="recurring-options" style="display: none; margin-top: 15px; padding: 15px; background-color: #f5f5f5; border-radius: 6px;">
+                    <label for="recurring-frequency">Repeat:</label>
+                    <select id="recurring-frequency" name="recurring-frequency">
+                      <option value="weekly">Weekly (same day each week)</option>
+                      <option value="biweekly">Bi-weekly (every 2 weeks)</option>
+                      <option value="monthly">Monthly (same date each month)</option>
+                    </select>
+
+                    <label for="recurring-count">Number of occurrences:</label>
+                    <input type="number" id="recurring-count" name="recurring-count" min="2" max="52" value="4" placeholder="e.g., 4">
+                    <small style="color: #666; font-size: 0.85em;">Including the first booking (max 52)</small>
+
+                    <div id="recurring-preview" style="margin-top: 10px; padding: 10px; background-color: white; border-radius: 4px; font-size: 0.9em; color: #333;">
+                      Preview will appear here...
+                    </div>
+                  </div>
+                </div>
+
                 <button type="submit">Create Booking</button>
               </form>
           </div>
@@ -157,7 +182,7 @@
     </div>
 
     <footer>
-      Created by Jason Dean Consulting Copyright 2025 - v0.8.0
+      Created by Jason Dean Consulting Copyright 2025 - v0.9.0
     </footer>
   </div>
 

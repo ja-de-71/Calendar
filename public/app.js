@@ -48,6 +48,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const loadingSpinner = document.getElementById('loading-spinner');
   const searchInput = document.getElementById('search-bookings');
   const clearSearchBtn = document.getElementById('clear-search');
+  const recurringEnabled = document.getElementById('recurring-enabled');
+  const recurringOptions = document.getElementById('recurring-options');
+  const recurringFrequency = document.getElementById('recurring-frequency');
+  const recurringCount = document.getElementById('recurring-count');
+  const recurringPreview = document.getElementById('recurring-preview');
 
   // App state
   let currentDate = new Date();
@@ -315,9 +320,17 @@ document.addEventListener('DOMContentLoaded', function() {
           cancelledInfo = `<p style="color:red; font-weight:bold;">CANCELLED by ${booking.cancelledBy} on ${new Date(booking.cancelledAt.seconds * 1000).toLocaleDateString()}</p>`;
       }
 
+      let recurringInfo = '';
+      if (booking.recurringGroupId) {
+        const frequencyText = booking.recurringFrequency === 'weekly' ? 'Weekly' :
+                             booking.recurringFrequency === 'biweekly' ? 'Bi-weekly' : 'Monthly';
+        recurringInfo = `<p style="color: #0078d4; font-size: 0.9em;">🔁 ${frequencyText} Recurring Booking</p>`;
+      }
+
       bookingEl.innerHTML = `
-        <h4>${booking.name}</h4>
+        <h4>${booking.name} ${booking.recurringGroupId ? '<span style="color: #0078d4;">🔁</span>' : ''}</h4>
         ${cancelledInfo}
+        ${recurringInfo}
         <p><strong>Time:</strong> ${booking.startTime} - ${booking.endTime}</p>
         <p><strong>Rinks:</strong> ${booking.rinks}</p>
         <p><strong>Phone:</strong> ${booking.phone}</p>
@@ -396,6 +409,54 @@ document.addEventListener('DOMContentLoaded', function() {
 
     html += '</tbody></table>';
     return html;
+  }
+
+  // --- RECURRING BOOKING FUNCTIONS --- //
+
+  // Generate array of dates based on recurrence pattern
+  function generateRecurringDates(startDate, frequency, count) {
+    const dates = [];
+    const start = new Date(startDate);
+
+    for (let i = 0; i < count; i++) {
+      const nextDate = new Date(start);
+
+      if (frequency === 'weekly') {
+        nextDate.setDate(start.getDate() + (i * 7));
+      } else if (frequency === 'biweekly') {
+        nextDate.setDate(start.getDate() + (i * 14));
+      } else if (frequency === 'monthly') {
+        nextDate.setMonth(start.getMonth() + i);
+      }
+
+      const dateString = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
+      dates.push({
+        date: dateString,
+        dateObj: nextDate
+      });
+    }
+
+    return dates;
+  }
+
+  // Update recurring booking preview
+  function updateRecurringPreview() {
+    const dateInput = document.getElementById('date').value;
+    if (!dateInput || !recurringEnabled.checked) {
+      return;
+    }
+
+    const frequency = recurringFrequency.value;
+    const count = parseInt(recurringCount.value) || 4;
+    const dates = generateRecurringDates(dateInput, frequency, Math.min(count, 52));
+
+    const dateList = dates.map((d, idx) => {
+      const dayName = d.dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+      const formattedDate = d.dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return `${idx + 1}. ${dayName}, ${formattedDate}`;
+    }).join('<br>');
+
+    recurringPreview.innerHTML = `<strong>Will create ${dates.length} bookings:</strong><br>${dateList}`;
   }
 
   // --- HELPER FUNCTIONS --- //
@@ -551,6 +612,16 @@ document.addEventListener('DOMContentLoaded', function() {
       uid: user.uid,
     };
 
+    // Check if this is a recurring booking
+    const isRecurring = recurringEnabled.checked;
+    const recurringDates = isRecurring
+      ? generateRecurringDates(
+          bookingData.date,
+          recurringFrequency.value,
+          Math.min(parseInt(recurringCount.value) || 4, 52)
+        )
+      : [{ date: bookingData.date }];
+
     // Validate all fields
     let isValid = true;
 
@@ -600,41 +671,102 @@ document.addEventListener('DOMContentLoaded', function() {
       return alert('End time must be after start time.');
     }
 
-    // Check for rink conflicts (reloads latest data from Firestore)
-    const conflictCheck = await checkRinkConflicts(
-      bookingData.date,
-      bookingData.startTime,
-      bookingData.endTime,
-      bookingData.rinks,
-      currentEditId // Exclude current booking when editing
-    );
+    // For recurring bookings, check conflicts on ALL dates first
+    if (isRecurring && !currentEditId) {
+      showLoading();
+      const conflicts = [];
 
-    if (conflictCheck.conflict) {
-      if (conflictCheck.message) {
-        return alert(conflictCheck.message);
+      for (const dateItem of recurringDates) {
+        const conflictCheck = await checkRinkConflicts(
+          dateItem.date,
+          bookingData.startTime,
+          bookingData.endTime,
+          bookingData.rinks,
+          null
+        );
+
+        if (conflictCheck.conflict) {
+          conflicts.push({
+            date: dateItem.date,
+            ...conflictCheck
+          });
+        }
       }
-      const rinkList = conflictCheck.rinks.join(', ');
-      return alert(
-        `Rink conflict! Rink(s) ${rinkList} are already booked from ${conflictCheck.time}.\n\n` +
-        `Existing booking: ${conflictCheck.booking.name}`
+
+      hideLoading();
+
+      if (conflicts.length > 0) {
+        const conflictMsg = conflicts.map(c => {
+          if (c.message) return `${c.date}: ${c.message}`;
+          return `${c.date}: Rink(s) ${c.rinks.join(', ')} already booked ${c.time}`;
+        }).join('\n');
+
+        return alert(
+          `Cannot create recurring booking due to conflicts:\n\n${conflictMsg}\n\n` +
+          `Please adjust your booking or reduce the number of occurrences.`
+        );
+      }
+    } else if (!currentEditId) {
+      // Single booking conflict check
+      const conflictCheck = await checkRinkConflicts(
+        bookingData.date,
+        bookingData.startTime,
+        bookingData.endTime,
+        bookingData.rinks,
+        currentEditId
       );
+
+      if (conflictCheck.conflict) {
+        if (conflictCheck.message) {
+          return alert(conflictCheck.message);
+        }
+        const rinkList = conflictCheck.rinks.join(', ');
+        return alert(
+          `Rink conflict! Rink(s) ${rinkList} are already booked from ${conflictCheck.time}.\n\n` +
+          `Existing booking: ${conflictCheck.booking.name}`
+        );
+      }
     }
 
     try {
+      showLoading();
+
       if (currentEditId) {
+        // Update existing booking (no recurring for edits)
         bookingData.updatedBy = user.email;
         bookingData.updatedAt = new Date();
         await db.collection('bookings').doc(currentEditId).update(bookingData);
         showSuccessToast('Booking updated successfully!');
+      } else if (isRecurring) {
+        // Create recurring bookings
+        const recurringGroupId = db.collection('bookings').doc().id; // Generate unique group ID
+
+        for (const dateItem of recurringDates) {
+          const recurringBooking = {
+            ...bookingData,
+            date: dateItem.date,
+            createdBy: user.email,
+            createdAt: new Date(),
+            recurringGroupId: recurringGroupId,
+            recurringFrequency: recurringFrequency.value
+          };
+          await db.collection('bookings').add(recurringBooking);
+        }
+
+        showSuccessToast(`${recurringDates.length} recurring bookings created successfully!`);
       } else {
+        // Create single booking
         bookingData.createdBy = user.email;
         bookingData.createdAt = new Date();
         await db.collection('bookings').add(bookingData);
         showSuccessToast('Booking created successfully!');
       }
+
+      hideLoading();
       resetBookingForm();
       loadAllData();
     } catch (error) {
+      hideLoading();
       console.error("Error saving document: ", error);
       alert('Failed to save booking.');
     }
@@ -669,6 +801,9 @@ document.addEventListener('DOMContentLoaded', function() {
       formTitle.textContent = 'Make a Booking';
       bookingForm.querySelector('button[type="submit"]').textContent = 'Create Booking';
       clearAllErrors();
+      recurringEnabled.checked = false;
+      recurringOptions.style.display = 'none';
+      recurringPreview.innerHTML = 'Preview will appear here...';
   }
 
   // --- REAL-TIME VALIDATION --- //
@@ -707,18 +842,62 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!bookingId) return;
 
     if (e.target.classList.contains('cancel-btn')) {
+      const bookingToCancel = bookings.find(b => b.id === bookingId);
+
+      // Check if this is part of a recurring series
+      let cancelSeries = false;
+      if (bookingToCancel && bookingToCancel.recurringGroupId) {
+        const seriesCount = bookings.filter(b =>
+          b.recurringGroupId === bookingToCancel.recurringGroupId && !b.cancelled
+        ).length;
+
+        if (seriesCount > 1) {
+          const choice = confirm(
+            `This is part of a recurring series (${seriesCount} bookings).\n\n` +
+            `Click OK to cancel ALL bookings in this series.\n` +
+            `Click Cancel to cancel only THIS occurrence.`
+          );
+          cancelSeries = choice;
+        }
+      }
+
       const cancellerName = prompt('To confirm cancellation, please enter your full name:');
       if (cancellerName && cancellerName.trim().length > 1) {
         try {
-          await db.collection('bookings').doc(bookingId).update({
-              cancelled: true,
-              cancelledBy: cancellerName.trim(),
-              cancelledAt: new Date()
-          });
-          showSuccessToast('Booking cancelled successfully!');
+          showLoading();
+
+          if (cancelSeries) {
+            // Cancel all bookings in the series
+            const seriesToCancel = bookings.filter(b =>
+              b.recurringGroupId === bookingToCancel.recurringGroupId && !b.cancelled
+            );
+
+            for (const booking of seriesToCancel) {
+              await db.collection('bookings').doc(booking.id).update({
+                cancelled: true,
+                cancelledBy: cancellerName.trim(),
+                cancelledAt: new Date()
+              });
+            }
+
+            hideLoading();
+            showSuccessToast(`${seriesToCancel.length} recurring bookings cancelled successfully!`);
+          } else {
+            // Cancel just this one
+            await db.collection('bookings').doc(bookingId).update({
+                cancelled: true,
+                cancelledBy: cancellerName.trim(),
+                cancelledAt: new Date()
+            });
+
+            hideLoading();
+            showSuccessToast('Booking cancelled successfully!');
+          }
+
           bookingModal.style.display = 'none';
           loadAllData();
         } catch (error) {
+          hideLoading();
           console.error('Error cancelling booking:', error);
           alert('Failed to cancel booking.');
         }
@@ -804,6 +983,18 @@ document.addEventListener('DOMContentLoaded', function() {
     searchQuery = '';
     renderCalendar();
   });
+
+  // --- RECURRING BOOKING EVENT LISTENERS --- //
+  recurringEnabled.addEventListener('change', (e) => {
+    recurringOptions.style.display = e.target.checked ? 'block' : 'none';
+    if (e.target.checked) {
+      updateRecurringPreview();
+    }
+  });
+
+  recurringFrequency.addEventListener('change', updateRecurringPreview);
+  recurringCount.addEventListener('input', updateRecurringPreview);
+  document.getElementById('date').addEventListener('change', updateRecurringPreview);
 
   // --- CSV IMPORT/EXPORT (ADMIN ONLY) --- //
   const uploadCsvBtn = document.getElementById('upload-csv-btn');
