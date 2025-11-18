@@ -7,7 +7,8 @@ service cloud.firestore {
     match /bookings/{bookingId} {
       allow read: if true;
       allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
+      // Allow update/delete if authenticated AND (booking has no uid OR user owns the booking)
+      allow update, delete: if request.auth != null && (!('uid' in resource.data) || request.auth.uid == resource.data.uid);
     }
 
     // Blackouts can be read by anyone, but only created or deleted by an authenticated user.
