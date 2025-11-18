@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const loadingSpinner = document.getElementById('loading-spinner');
   const searchInput = document.getElementById('search-bookings');
   const clearSearchBtn = document.getElementById('clear-search');
+  const searchResults = document.getElementById('search-results');
   const recurringEnabled = document.getElementById('recurring-enabled');
   const recurringOptions = document.getElementById('recurring-options');
   const recurringFrequency = document.getElementById('recurring-frequency');
@@ -973,15 +974,80 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('click', (e) => { if (e.target == bookingModal) bookingModal.style.display = 'none'; });
 
   // --- SEARCH/FILTER FUNCTIONALITY --- //
+
+  function displaySearchResults(query) {
+    if (!query || query.length < 2) {
+      searchResults.style.display = 'none';
+      return;
+    }
+
+    const queryLower = query.toLowerCase();
+    const matches = bookings.filter(b => {
+      if (b.cancelled) return false;
+      return b.name.toLowerCase().includes(queryLower) ||
+             b.phone.includes(query) ||
+             (b.email && b.email.toLowerCase().includes(queryLower));
+    }).sort((a, b) => {
+      // Sort by date, then by time
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return a.startTime.localeCompare(b.startTime);
+    });
+
+    if (matches.length === 0) {
+      searchResults.innerHTML = '<div class="search-no-results">No bookings found matching your search.</div>';
+      searchResults.style.display = 'block';
+      return;
+    }
+
+    let html = `<div class="search-results-header">Found ${matches.length} booking${matches.length > 1 ? 's' : ''}</div>`;
+
+    matches.forEach(booking => {
+      const dateObj = new Date(booking.date + 'T00:00:00');
+      const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      const recurringBadge = booking.recurringGroupId ? '<span class="search-result-recurring">🔁 Recurring</span>' : '';
+
+      html += `
+        <div class="search-result-item" data-booking-id="${booking.id}" data-date="${booking.date}">
+          <div class="search-result-name">${booking.name}${recurringBadge}</div>
+          <div class="search-result-details">
+            📅 ${formattedDate}<br>
+            🕐 ${booking.startTime} - ${booking.endTime}<br>
+            🎯 Rinks: ${booking.rinks}<br>
+            📞 ${booking.phone}
+          </div>
+        </div>
+      `;
+    });
+
+    searchResults.innerHTML = html;
+    searchResults.style.display = 'block';
+  }
+
   searchInput.addEventListener('input', (e) => {
     searchQuery = e.target.value.trim();
-    renderCalendar();
+    displaySearchResults(searchQuery);
+    renderCalendar(); // Still highlight matching days on calendar
   });
 
   clearSearchBtn.addEventListener('click', () => {
     searchInput.value = '';
     searchQuery = '';
+    searchResults.style.display = 'none';
     renderCalendar();
+  });
+
+  // Click on search result to navigate to that date
+  searchResults.addEventListener('click', (e) => {
+    const resultItem = e.target.closest('.search-result-item');
+    if (!resultItem) return;
+
+    const bookingDate = resultItem.dataset.date;
+    const [year, month, day] = bookingDate.split('-').map(Number);
+    currentDate = new Date(year, month - 1, day);
+    renderCalendar();
+
+    // Scroll calendar into view
+    calendarEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 
   // --- RECURRING BOOKING EVENT LISTENERS --- //
