@@ -195,13 +195,11 @@
         dayEl.classList.add('calendar-day');
         const date = new Date(Date.UTC(year, month, i));
 
+        // Format date as YYYY-MM-DD for consistent comparison
+        const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+
         // Check for blackouts
-        const blackout = blackouts.find(b => {
-          const blackoutDate = new Date(b.date);
-          return blackoutDate.getUTCFullYear() === date.getUTCFullYear() &&
-                 blackoutDate.getUTCMonth() === date.getUTCMonth() &&
-                 blackoutDate.getUTCDate() === date.getUTCDate();
-        });
+        const blackout = blackouts.find(b => b.date === dateString);
 
         dayEl.innerHTML = `<div class="day-number">${i}</div>`;
 
@@ -211,11 +209,7 @@
         } else {
           // Get bookings for this day (exclude cancelled)
           const bookingsForDay = bookings.filter(b => {
-            const bookingDate = new Date(b.date);
-            return !b.cancelled &&
-                   bookingDate.getUTCFullYear() === date.getUTCFullYear() &&
-                   bookingDate.getUTCMonth() === date.getUTCMonth() &&
-                   bookingDate.getUTCDate() === date.getUTCDate();
+            return !b.cancelled && b.date === dateString;
           });
 
           if (bookingsForDay.length > 0) {

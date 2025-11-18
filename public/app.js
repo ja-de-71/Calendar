@@ -193,12 +193,10 @@ document.addEventListener('DOMContentLoaded', function() {
       dayEl.classList.add('calendar-day');
       const date = new Date(Date.UTC(year, month, i));
 
-      const blackout = blackouts.find(b => {
-          const blackoutDate = new Date(b.date);
-          return blackoutDate.getUTCFullYear() === date.getUTCFullYear() &&
-                 blackoutDate.getUTCMonth() === date.getUTCMonth() &&
-                 blackoutDate.getUTCDate() === date.getUTCDate();
-      });
+      // Format date as YYYY-MM-DD for consistent comparison
+      const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+
+      const blackout = blackouts.find(b => b.date === dateString);
 
       dayEl.innerHTML = `<div class="day-number">${i}</div>`;
 
@@ -207,11 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
         dayEl.innerHTML += `<div class="blackout-reason">${blackout.reason}</div>`;
       } else {
         const bookingsForDay = bookings.filter(b => {
-          const bookingDate = new Date(b.date);
-          return !b.cancelled &&
-                 bookingDate.getUTCFullYear() === date.getUTCFullYear() &&
-                 bookingDate.getUTCMonth() === date.getUTCMonth() &&
-                 bookingDate.getUTCDate() === date.getUTCDate();
+          return !b.cancelled && b.date === dateString;
         });
 
         if (bookingsForDay.length > 0) {
@@ -240,12 +234,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function showBookingModal(date) {
     modalBody.innerHTML = '';
-    const dayBookings = bookings.filter(b => {
-        const bookingDate = new Date(b.date);
-        return bookingDate.getUTCFullYear() === date.getUTCFullYear() &&
-               bookingDate.getUTCMonth() === date.getUTCMonth() &&
-               bookingDate.getUTCDate() === date.getUTCDate();
-    });
+    // Convert Date object to YYYY-MM-DD string for comparison
+    const dateString = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+    const dayBookings = bookings.filter(b => b.date === dateString);
 
     dayBookings.forEach(booking => {
       const bookingEl = document.createElement('div');
@@ -369,13 +360,8 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     // Prevent booking on a blacked out date
-    const d = new Date(bookingData.date + "T00:00:00");
-    const isBlackedOut = blackouts.some(b => {
-        const blackoutDate = new Date(b.date);
-        return blackoutDate.getUTCFullYear() === d.getUTCFullYear() &&
-               blackoutDate.getUTCMonth() === d.getUTCMonth() &&
-               blackoutDate.getUTCDate() === d.getUTCDate();
-    });
+    // Simple string comparison to avoid timezone issues
+    const isBlackedOut = blackouts.some(b => b.date === bookingData.date);
 
     if (isBlackedOut) {
         return alert('This date is blacked out and cannot be booked.');
