@@ -281,6 +281,47 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- FORM HANDLING --- //
+
+  // Check for rink conflicts
+  function checkRinkConflicts(date, startTime, endTime, rinks, excludeBookingId = null) {
+    // Parse the rinks being requested
+    const requestedRinks = parseRinks(rinks);
+
+    // Get all non-cancelled bookings for this date
+    const dayBookings = bookings.filter(b => {
+      if (b.cancelled) return false;
+      if (b.id === excludeBookingId) return false; // Exclude current booking when editing
+      return b.date === date;
+    });
+
+    // Check each booking for time and rink conflicts
+    for (const booking of dayBookings) {
+      // Check if time ranges overlap
+      const existingStart = booking.startTime;
+      const existingEnd = booking.endTime;
+
+      // Time ranges overlap if: start < existing.end AND end > existing.start
+      const timesOverlap = startTime < existingEnd && endTime > existingStart;
+
+      if (timesOverlap) {
+        // Check if any rinks conflict
+        const existingRinks = parseRinks(booking.rinks);
+        const conflictingRinks = requestedRinks.filter(r => existingRinks.includes(r));
+
+        if (conflictingRinks.length > 0) {
+          return {
+            conflict: true,
+            rinks: conflictingRinks,
+            time: `${existingStart} - ${existingEnd}`,
+            booking: booking
+          };
+        }
+      }
+    }
+
+    return { conflict: false };
+  }
+
   bookingForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const user = auth.currentUser;
@@ -314,6 +355,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (new Date(`${bookingData.date}T${bookingData.endTime}`) <= new Date(`${bookingData.date}T${bookingData.startTime}`)) {
       return alert('End time must be after start time.');
+    }
+
+    // Check for rink conflicts
+    const conflictCheck = checkRinkConflicts(
+      bookingData.date,
+      bookingData.startTime,
+      bookingData.endTime,
+      bookingData.rinks,
+      currentEditId // Exclude current booking when editing
+    );
+
+    if (conflictCheck.conflict) {
+      const rinkList = conflictCheck.rinks.join(', ');
+      return alert(
+        `Rink conflict! Rink(s) ${rinkList} are already booked from ${conflictCheck.time}.\n\n` +
+        `Existing booking: ${conflictCheck.booking.name}`
+      );
     }
 
     try {
