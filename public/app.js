@@ -53,10 +53,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Auth form elements
   const signinForm = document.getElementById('signin');
-  const signupForm = document.getElementById('signup');
   const resetForm = document.getElementById('reset');
   const signinFormDiv = document.getElementById('signin-form');
-  const signupFormDiv = document.getElementById('signup-form');
   const resetFormDiv = document.getElementById('reset-form');
 
   // --- AUTHENTICATION --- //
@@ -90,29 +88,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Sign Up
-  signupForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('signup-email').value;
-    const password = document.getElementById('signup-password').value;
-    const confirmPassword = document.getElementById('signup-password-confirm').value;
-    const errorDiv = document.getElementById('signup-error');
-
-    errorDiv.textContent = '';
-
-    if (password !== confirmPassword) {
-      errorDiv.textContent = 'Passwords do not match';
-      return;
-    }
-
-    try {
-      await auth.createUserWithEmailAndPassword(email, password);
-      signupForm.reset();
-    } catch (error) {
-      errorDiv.textContent = getErrorMessage(error);
-    }
-  });
-
   // Password Reset
   resetForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -133,16 +108,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Form switching
-  document.getElementById('show-signup').addEventListener('click', (e) => {
-    e.preventDefault();
-    showSignupForm();
-  });
-
-  document.getElementById('show-signin').addEventListener('click', (e) => {
-    e.preventDefault();
-    showSigninForm();
-  });
-
   document.getElementById('show-reset').addEventListener('click', (e) => {
     e.preventDefault();
     showResetForm();
@@ -155,28 +120,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function showSigninForm() {
     signinFormDiv.style.display = 'block';
-    signupFormDiv.style.display = 'none';
-    resetFormDiv.style.display = 'none';
-    clearAuthErrors();
-  }
-
-  function showSignupForm() {
-    signinFormDiv.style.display = 'none';
-    signupFormDiv.style.display = 'block';
     resetFormDiv.style.display = 'none';
     clearAuthErrors();
   }
 
   function showResetForm() {
     signinFormDiv.style.display = 'none';
-    signupFormDiv.style.display = 'none';
     resetFormDiv.style.display = 'block';
     clearAuthErrors();
   }
 
   function clearAuthErrors() {
     document.getElementById('signin-error').textContent = '';
-    document.getElementById('signup-error').textContent = '';
     document.getElementById('reset-error').textContent = '';
     document.getElementById('reset-success').textContent = '';
   }
