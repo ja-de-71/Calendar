@@ -290,6 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       renderCalendar();
       updateBookingSummary();
+      updateStatsDashboard(); // Update admin stats
     } finally {
       hideLoading();
     }
@@ -487,6 +488,90 @@ document.addEventListener('DOMContentLoaded', function() {
       return sum + parseRinks(b.rinks).length;
     }, 0);
     bookingSummaryEl.textContent = `Total Active Bookings: ${activeBookings.length} | Total Rinks Booked: ${totalRinks}`;
+  }
+
+  // Update stats dashboard
+  function updateStatsDashboard() {
+    const statsContainer = document.getElementById('stats-dashboard');
+    if (!statsContainer) return;
+
+    const activeBookings = bookings.filter(b => !b.cancelled);
+    const totalRinks = activeBookings.reduce((sum, b) => sum + parseRinks(b.rinks).length, 0);
+
+    // Get upcoming bookings (next 7 days)
+    const today = new Date();
+    const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const todayStr = today.toISOString().split('T')[0];
+    const nextWeekStr = nextWeek.toISOString().split('T')[0];
+    const upcomingBookings = activeBookings.filter(b => b.date >= todayStr && b.date <= nextWeekStr).length;
+
+    // Find most popular time slot
+    const timeSlots = {};
+    activeBookings.forEach(b => {
+      const slot = `${b.startTime}-${b.endTime}`;
+      timeSlots[slot] = (timeSlots[slot] || 0) + 1;
+    });
+    const mostPopularTime = Object.keys(timeSlots).length > 0
+      ? Object.entries(timeSlots).sort((a, b) => b[1] - a[1])[0][0]
+      : 'N/A';
+
+    // Find most booked rink
+    const rinkCounts = {};
+    activeBookings.forEach(b => {
+      parseRinks(b.rinks).forEach(r => {
+        rinkCounts[r] = (rinkCounts[r] || 0) + 1;
+      });
+    });
+    const mostBookedRink = Object.keys(rinkCounts).length > 0
+      ? Object.entries(rinkCounts).sort((a, b) => b[1] - a[1])[0][0]
+      : 'N/A';
+
+    // Find busiest day of week
+    const dayOfWeek = {};
+    activeBookings.forEach(b => {
+      const date = new Date(b.date + 'T00:00:00');
+      const day = date.toLocaleDateString('en-US', { weekday: 'long' });
+      dayOfWeek[day] = (dayOfWeek[day] || 0) + 1;
+    });
+    const busiestDay = Object.keys(dayOfWeek).length > 0
+      ? Object.entries(dayOfWeek).sort((a, b) => b[1] - a[1])[0][0]
+      : 'N/A';
+
+    // Count recurring bookings
+    const recurringCount = activeBookings.filter(b => b.recurringGroupId).length;
+
+    statsContainer.innerHTML = `
+      <div class="stat-card green">
+        <div class="stat-label">Total Bookings</div>
+        <div class="stat-value">${activeBookings.length}</div>
+        <div class="stat-sublabel">${recurringCount} recurring</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Rinks Booked</div>
+        <div class="stat-value">${totalRinks}</div>
+        <div class="stat-sublabel">Across all bookings</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-label">Next 7 Days</div>
+        <div class="stat-value">${upcomingBookings}</div>
+        <div class="stat-sublabel">Upcoming bookings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Popular Time</div>
+        <div class="stat-value" style="font-size: 1.5em;">${mostPopularTime}</div>
+        <div class="stat-sublabel">Most booked slot</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Top Rink</div>
+        <div class="stat-value">Rink ${mostBookedRink}</div>
+        <div class="stat-sublabel">Most popular</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Busiest Day</div>
+        <div class="stat-value" style="font-size: 1.8em;">${busiestDay}</div>
+        <div class="stat-sublabel">Of the week</div>
+      </div>
+    `;
   }
 
   // Form validation
