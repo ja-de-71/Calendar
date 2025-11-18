@@ -612,7 +612,8 @@ document.addEventListener('DOMContentLoaded', function() {
             continue;
           }
 
-          const [name, phone, email, date, startTime, endTime, rinks, ...notesParts] = fields;
+          const [name, phone, email, date, startTime, endTime, rinksRaw, ...notesParts] = fields;
+          const rinks = rinksRaw.replace(/^"|"$/g, ''); // Remove surrounding quotes
           const notes = notesParts.join(',').trim(); // Rejoin notes in case they had commas
 
           // Validate date format (must be YYYY-MM-DD)
