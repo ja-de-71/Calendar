@@ -275,3 +275,99 @@ footer {
 .booking-actions .cancel-btn {
   background-color: #f44336; /* Red */
 }
+
+/* Authentication Forms */
+#auth-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #00796b 0%, #009688 100%);
+}
+
+.auth-wrapper {
+  background-color: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 400px;
+}
+
+.auth-wrapper h1 {
+  text-align: center;
+  color: #00796b;
+  margin-bottom: 30px;
+  font-size: 1.8em;
+}
+
+.auth-form h2 {
+  color: #00796b;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1em;
+  box-sizing: border-box;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: #009688;
+  box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.1);
+}
+
+.auth-form button {
+  width: 100%;
+  padding: 12px;
+  background-color: #009688;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.auth-form button:hover {
+  background-color: #00796b;
+}
+
+.auth-toggle {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 0.9em;
+}
+
+.auth-toggle a {
+  color: #009688;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.auth-toggle a:hover {
+  text-decoration: underline;
+}
+
+.auth-error {
+  color: #f44336;
+  font-size: 0.9em;
+  margin-top: 10px;
+  text-align: center;
+  min-height: 20px;
+}
+
+.auth-success {
+  color: #4caf50;
+  font-size: 0.9em;
+  margin-top: 10px;
+  text-align: center;
+  min-height: 20px;
+}

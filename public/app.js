@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const app = document.getElementById('app');
   const userEmail = document.getElementById('user-email');
   const signOut = document.getElementById('sign-out');
-  const authContainer = document.getElementById('firebaseui-auth-container');
+  const authContainer = document.getElementById('auth-container');
   const calendarEl = document.getElementById('calendar');
   const monthYear = document.getElementById('month-year');
   const prevMonthBtn = document.getElementById('prev-month');
@@ -51,22 +51,13 @@ document.addEventListener('DOMContentLoaded', function() {
   let blackouts = []; // For storing blackout dates
   let currentEditId = null;
 
-  // FirebaseUI config
-  const ui = new firebaseui.auth.AuthUI(auth);
-  const uiConfig = {
-    callbacks: {
-      signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-        // User successfully signed in.
-        // Return true to redirect the user to the signInSuccessUrl
-        return true;
-      }
-    },
-    signInFlow: 'redirect',
-    signInSuccessUrl: '/',
-    signInOptions: [
-      firebase.auth.EmailAuthProvider.PROVIDER_ID,
-    ],
-  };
+  // Auth form elements
+  const signinForm = document.getElementById('signin');
+  const signupForm = document.getElementById('signup');
+  const resetForm = document.getElementById('reset');
+  const signinFormDiv = document.getElementById('signin-form');
+  const signupFormDiv = document.getElementById('signup-form');
+  const resetFormDiv = document.getElementById('reset-form');
 
   // --- AUTHENTICATION --- //
   auth.onAuthStateChanged(user => {
@@ -78,9 +69,136 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       app.style.display = 'none';
       authContainer.style.display = 'block';
-      ui.start('#firebaseui-auth-container', uiConfig);
+      showSigninForm();
     }
   });
+
+  // Sign In
+  signinForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('signin-email').value;
+    const password = document.getElementById('signin-password').value;
+    const errorDiv = document.getElementById('signin-error');
+
+    errorDiv.textContent = '';
+
+    try {
+      await auth.signInWithEmailAndPassword(email, password);
+      signinForm.reset();
+    } catch (error) {
+      errorDiv.textContent = getErrorMessage(error);
+    }
+  });
+
+  // Sign Up
+  signupForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const confirmPassword = document.getElementById('signup-password-confirm').value;
+    const errorDiv = document.getElementById('signup-error');
+
+    errorDiv.textContent = '';
+
+    if (password !== confirmPassword) {
+      errorDiv.textContent = 'Passwords do not match';
+      return;
+    }
+
+    try {
+      await auth.createUserWithEmailAndPassword(email, password);
+      signupForm.reset();
+    } catch (error) {
+      errorDiv.textContent = getErrorMessage(error);
+    }
+  });
+
+  // Password Reset
+  resetForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('reset-email').value;
+    const errorDiv = document.getElementById('reset-error');
+    const successDiv = document.getElementById('reset-success');
+
+    errorDiv.textContent = '';
+    successDiv.textContent = '';
+
+    try {
+      await auth.sendPasswordResetEmail(email);
+      successDiv.textContent = 'Password reset email sent! Check your inbox.';
+      resetForm.reset();
+    } catch (error) {
+      errorDiv.textContent = getErrorMessage(error);
+    }
+  });
+
+  // Form switching
+  document.getElementById('show-signup').addEventListener('click', (e) => {
+    e.preventDefault();
+    showSignupForm();
+  });
+
+  document.getElementById('show-signin').addEventListener('click', (e) => {
+    e.preventDefault();
+    showSigninForm();
+  });
+
+  document.getElementById('show-reset').addEventListener('click', (e) => {
+    e.preventDefault();
+    showResetForm();
+  });
+
+  document.getElementById('back-to-signin').addEventListener('click', (e) => {
+    e.preventDefault();
+    showSigninForm();
+  });
+
+  function showSigninForm() {
+    signinFormDiv.style.display = 'block';
+    signupFormDiv.style.display = 'none';
+    resetFormDiv.style.display = 'none';
+    clearAuthErrors();
+  }
+
+  function showSignupForm() {
+    signinFormDiv.style.display = 'none';
+    signupFormDiv.style.display = 'block';
+    resetFormDiv.style.display = 'none';
+    clearAuthErrors();
+  }
+
+  function showResetForm() {
+    signinFormDiv.style.display = 'none';
+    signupFormDiv.style.display = 'none';
+    resetFormDiv.style.display = 'block';
+    clearAuthErrors();
+  }
+
+  function clearAuthErrors() {
+    document.getElementById('signin-error').textContent = '';
+    document.getElementById('signup-error').textContent = '';
+    document.getElementById('reset-error').textContent = '';
+    document.getElementById('reset-success').textContent = '';
+  }
+
+  function getErrorMessage(error) {
+    switch (error.code) {
+      case 'auth/user-not-found':
+        return 'No account found with this email. Please create an account.';
+      case 'auth/wrong-password':
+        return 'Incorrect password. Please try again.';
+      case 'auth/email-already-in-use':
+        return 'An account with this email already exists. Please sign in.';
+      case 'auth/weak-password':
+        return 'Password should be at least 6 characters.';
+      case 'auth/invalid-email':
+        return 'Please enter a valid email address.';
+      case 'auth/too-many-requests':
+        return 'Too many failed attempts. Please try again later.';
+      default:
+        return error.message;
+    }
+  }
 
   signOut.addEventListener('click', (e) => {
     e.preventDefault();
