@@ -111,6 +111,43 @@
       padding: 3px 5px;
       border-radius: 3px;
       margin-bottom: 3px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .booking-summary:hover {
+      background-color: #b3d9ff;
+    }
+
+    .booking-notes-preview {
+      color: #666;
+      font-style: italic;
+      font-size: 0.9em;
+    }
+
+    /* Tooltip for booking details */
+    .booking-tooltip {
+      position: fixed;
+      background-color: white;
+      border: 2px solid #0059c4;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 1000;
+      max-width: 300px;
+      display: none;
+    }
+
+    .booking-tooltip h4 {
+      color: #0059c4;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #0059c4;
+      padding-bottom: 5px;
+    }
+
+    .booking-tooltip p {
+      margin: 8px 0;
+      line-height: 1.4;
     }
 
     .day-blackout {
@@ -146,6 +183,9 @@
     </div>
   </div>
 
+  <!-- Tooltip for booking details -->
+  <div id="booking-tooltip" class="booking-tooltip"></div>
+
   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
   <script>
@@ -169,6 +209,7 @@
     const prevMonthBtn = document.getElementById('prev-month');
     const nextMonthBtn = document.getElementById('next-month');
     const todayBtn = document.getElementById('today');
+    const tooltip = document.getElementById('booking-tooltip');
 
     // State
     let currentDate = new Date();
@@ -251,9 +292,11 @@
 
           if (bookingsForDay.length > 0) {
             dayEl.classList.add('has-bookings');
-            const bookingList = bookingsForDay.map(b =>
-              `<div class="booking-summary">${b.startTime} - ${b.endTime} (${parseRinks(b.rinks).length} rinks)</div>`
-            ).join('');
+            const bookingList = bookingsForDay.map(b => {
+              const rinkCount = parseRinks(b.rinks).length;
+              const notesPreview = b.notes ? `<br><span class="booking-notes-preview">${b.notes.substring(0, 25)}${b.notes.length > 25 ? '...' : ''}</span>` : '';
+              return `<div class="booking-summary" data-booking-id="${b.id}">${b.startTime} - ${b.endTime} (${rinkCount} rinks)${notesPreview}</div>`;
+            }).join('');
             dayEl.innerHTML += bookingList;
           }
         }
@@ -292,6 +335,51 @@
     todayBtn.addEventListener('click', () => {
       currentDate = new Date();
       renderCalendar();
+    });
+
+    // Tooltip handling
+    calendarEl.addEventListener('click', (e) => {
+      const bookingSummary = e.target.closest('.booking-summary');
+      if (bookingSummary) {
+        const bookingId = bookingSummary.dataset.bookingId;
+        const booking = bookings.find(b => b.id === bookingId);
+        if (booking) {
+          showTooltip(booking, e);
+        }
+      } else {
+        hideTooltip();
+      }
+    });
+
+    function showTooltip(booking, event) {
+      const dateObj = new Date(booking.date + 'T00:00:00');
+      const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+      tooltip.innerHTML = `
+        <h4>${formattedDate}</h4>
+        <p><strong>Time:</strong> ${booking.startTime} - ${booking.endTime}</p>
+        <p><strong>Rinks:</strong> ${booking.rinks}</p>
+        ${booking.notes ? `<p><strong>Notes:</strong> ${booking.notes}</p>` : ''}
+      `;
+
+      // Position tooltip near the click
+      const x = event.clientX + 10;
+      const y = event.clientY + 10;
+
+      tooltip.style.left = x + 'px';
+      tooltip.style.top = y + 'px';
+      tooltip.style.display = 'block';
+    }
+
+    function hideTooltip() {
+      tooltip.style.display = 'none';
+    }
+
+    // Close tooltip when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.booking-summary') && !e.target.closest('.booking-tooltip')) {
+        hideTooltip();
+      }
     });
 
     // Initial load

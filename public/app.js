@@ -239,9 +239,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (bookingsForDay.length > 0) {
           dayEl.classList.add('has-bookings');
-          const bookingList = bookingsForDay.map(b =>
-            `<div class="booking-summary">${b.startTime} - ${b.endTime} (${parseRinks(b.rinks).length} rinks)</div>`
-          ).join('');
+          const bookingList = bookingsForDay.map(b => {
+            const rinkCount = parseRinks(b.rinks).length;
+            const notesPreview = b.notes ? `<br><span style="color: #666; font-style: italic;">${b.notes.substring(0, 25)}${b.notes.length > 25 ? '...' : ''}</span>` : '';
+            return `<div class="booking-summary">${b.startTime} - ${b.endTime} (${rinkCount} rinks)${notesPreview}</div>`;
+          }).join('');
           dayEl.innerHTML += bookingList;
 
           // Add click handler with availability view option (shift+click or right click)
