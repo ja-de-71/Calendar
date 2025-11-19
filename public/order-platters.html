@@ -677,11 +677,15 @@
       if (fingerFoodTiers.length > 0) {
         const desc = fingerFoodTiers.map(t => `${t.itemCount} items: $${t.pricePerPerson}/pp`).join(' • ');
         document.getElementById('finger-food-pricing-desc').textContent = desc;
+      } else {
+        document.getElementById('finger-food-pricing-desc').textContent = 'No pricing configured';
       }
 
       if (gourmetTiers.length > 0) {
         const desc = gourmetTiers.map(t => `${t.itemCount} items: $${t.pricePerPerson}/pp`).join(' • ');
         document.getElementById('gourmet-pricing-desc').textContent = desc;
+      } else {
+        document.getElementById('gourmet-pricing-desc').textContent = 'No pricing configured';
       }
 
       // Render current pricing
