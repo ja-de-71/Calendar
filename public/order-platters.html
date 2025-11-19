@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Food Platters - Portland Memorial Bowls</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0059c4 0%, #0078d4 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+      padding-bottom: 30px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .section:last-child {
+      border-bottom: none;
+    }
+
+    .section-title {
+      font-size: 1.5em;
+      color: #0059c4;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .required {
+      color: #d32f2f;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 5px;
+      font-size: 1em;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #0059c4;
+    }
+
+    .form-group small {
+      display: block;
+      margin-top: 5px;
+      color: #666;
+      font-size: 0.9em;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .platter-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .platter-tab {
+      flex: 1;
+      padding: 15px;
+      background-color: #f5f5f5;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .platter-tab:hover {
+      background-color: #e3f2fd;
+      border-color: #0059c4;
+    }
+
+    .platter-tab.active {
+      background-color: #0059c4;
+      color: white;
+      border-color: #0059c4;
+    }
+
+    .platter-tab h3 {
+      margin-bottom: 5px;
+    }
+
+    .platter-tab p {
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+
+    .menu-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .menu-item {
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      background-color: white;
+    }
+
+    .menu-item:hover {
+      border-color: #0059c4;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .menu-item.selected {
+      background-color: #0059c4;
+      color: white;
+      border-color: #0059c4;
+    }
+
+    .menu-item-name {
+      font-weight: bold;
+      font-size: 1em;
+    }
+
+    .menu-item-check {
+      float: right;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #e0e0e0;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: white;
+    }
+
+    .menu-item.selected .menu-item-check {
+      background-color: white;
+      border-color: white;
+      color: #0059c4;
+    }
+
+    .pricing-info {
+      background-color: #e3f2fd;
+      border-left: 4px solid #0059c4;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+
+    .pricing-info h4 {
+      color: #0059c4;
+      margin-bottom: 10px;
+    }
+
+    .pricing-tier {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+    }
+
+    .selection-summary {
+      background-color: #f5f5f5;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .selection-summary h4 {
+      margin-bottom: 10px;
+      color: #0059c4;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px 0;
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #0059c4;
+    }
+
+    .additional-platters {
+      margin-top: 20px;
+    }
+
+    .additional-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .additional-item-info h4 {
+      margin-bottom: 5px;
+    }
+
+    .additional-item-info p {
+      font-size: 0.9em;
+      color: #666;
+    }
+
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quantity-btn {
+      width: 35px;
+      height: 35px;
+      border: 2px solid #0059c4;
+      background-color: white;
+      color: #0059c4;
+      border-radius: 5px;
+      font-size: 1.2em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quantity-btn:hover {
+      background-color: #0059c4;
+      color: white;
+    }
+
+    .quantity-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .quantity-display {
+      min-width: 30px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .btn {
+      padding: 15px 30px;
+      background-color: #0059c4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      width: 100%;
+    }
+
+    .btn:hover {
+      background-color: #0078d4;
+    }
+
+    .btn:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+
+    .alert-info {
+      background-color: #e3f2fd;
+      border-left: 4px solid #1976d2;
+      color: #1565c0;
+    }
+
+    .alert-warning {
+      background-color: #fff3e0;
+      border-left: 4px solid #f57c00;
+      color: #e65100;
+    }
+
+    .alert-error {
+      background-color: #ffebee;
+      border-left: 4px solid #d32f2f;
+      color: #c62828;
+    }
+
+    .alert-success {
+      background-color: #e8f5e9;
+      border-left: 4px solid #4caf50;
+      color: #2e7d32;
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      z-index: 2000;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      max-width: 350px;
+    }
+
+    .toast.success {
+      background-color: #4caf50;
+    }
+
+    .toast.error {
+      background-color: #f44336;
+    }
+
+    .loading-spinner {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 3000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #0059c4;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .success-message {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .success-message h2 {
+      color: #4caf50;
+      margin-bottom: 20px;
+      font-size: 2em;
+    }
+
+    .success-message .order-number {
+      font-size: 1.5em;
+      color: #0059c4;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      .content {
+        padding: 20px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .menu-items {
+        grid-template-columns: 1fr;
+      }
+
+      .platter-tabs {
+        flex-direction: column;
+      }
+
+      .additional-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Order Form -->
+  <div id="order-form" class="container">
+    <div class="header">
+      <h1>🍽️ Order Food Platters</h1>
+      <p>Portland Memorial Bowls - Delicious platters for your event</p>
+    </div>
+
+    <div class="content">
+      <!-- Important Information -->
+      <div class="alert alert-info">
+        <strong>Important:</strong> Orders require 7 days notice. Minimum 10 people. Payment is required before preparation.
+      </div>
+
+      <!-- Date & People Section -->
+      <div class="section">
+        <h2 class="section-title">📅 Event Details</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="order-date">Delivery Date <span class="required">*</span></label>
+            <input type="date" id="order-date" required>
+            <small>Minimum 7 days from today</small>
+          </div>
+
+          <div class="form-group">
+            <label for="delivery-time">Delivery Time <span class="required">*</span></label>
+            <input type="time" id="delivery-time" value="12:00" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="num-people">Number of People <span class="required">*</span></label>
+          <input type="number" id="num-people" min="10" value="10" required>
+          <small>Minimum 10 people</small>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="link-to-booking" style="width: auto; margin-right: 8px;">
+            Link to an existing bowling booking
+          </label>
+        </div>
+
+        <div id="booking-id-group" class="form-group hidden">
+          <label for="booking-id">Booking Reference/Date</label>
+          <input type="text" id="booking-id" placeholder="e.g., Booking on 2025-11-25">
+          <small>Optional: Reference to your bowling booking</small>
+        </div>
+      </div>
+
+      <!-- Platter Selection Section -->
+      <div class="section">
+        <h2 class="section-title">🍴 Choose Your Platter</h2>
+
+        <div class="platter-tabs">
+          <div class="platter-tab active" onclick="selectPlatterType('finger-food')">
+            <h3>Finger Food</h3>
+            <p id="finger-food-pricing-desc">Loading pricing...</p>
+          </div>
+          <div class="platter-tab" onclick="selectPlatterType('gourmet')">
+            <h3>Gourmet Finger Food</h3>
+            <p id="gourmet-pricing-desc">Loading pricing...</p>
+          </div>
+        </div>
+
+        <div id="pricing-info" class="pricing-info">
+          <!-- Pricing tiers will be inserted here -->
+        </div>
+
+        <div id="selection-instruction" class="alert alert-warning">
+          Please select items to see pricing
+        </div>
+
+        <div id="menu-items-container" class="menu-items">
+          <!-- Menu items will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Additional Platters Section -->
+      <div class="section">
+        <h2 class="section-title">➕ Additional Platters (Optional)</h2>
+        <p style="margin-bottom: 15px; color: #666;">Add extra platters to complement your order. Each serves approximately 8 people.</p>
+
+        <div id="additional-platters-container">
+          <!-- Additional platters will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Order Summary Section -->
+      <div class="section">
+        <h2 class="section-title">📋 Order Summary</h2>
+        <div id="order-summary" class="selection-summary">
+          <p style="color: #666; text-align: center;">Select your platter items to see summary</p>
+        </div>
+      </div>
+
+      <!-- Customer Information Section -->
+      <div class="section">
+        <h2 class="section-title">👤 Your Information</h2>
+
+        <div class="form-group">
+          <label for="customer-name">Full Name <span class="required">*</span></label>
+          <input type="text" id="customer-name" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="customer-email">Email <span class="required">*</span></label>
+            <input type="email" id="customer-email" required>
+          </div>
+
+          <div class="form-group">
+            <label for="customer-phone">Phone <span class="required">*</span></label>
+            <input type="tel" id="customer-phone" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="order-notes">Special Requests or Dietary Requirements</label>
+          <textarea id="order-notes" rows="4" placeholder="Any allergies, dietary requirements, or special requests..."></textarea>
+        </div>
+      </div>
+
+      <!-- Submit Section -->
+      <div class="section">
+        <div id="validation-errors"></div>
+        <button class="btn" onclick="submitOrder()">Submit Order</button>
+        <p style="margin-top: 15px; text-align: center; color: #666; font-size: 0.9em;">
+          You will receive a confirmation email with payment instructions.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div id="success-container" class="container hidden">
+    <div class="success-message">
+      <h2>✅ Order Submitted Successfully!</h2>
+      <div class="order-number" id="success-order-number"></div>
+      <p style="margin-bottom: 20px;">Thank you for your order. We've sent a confirmation email to <strong id="success-email"></strong></p>
+
+      <div class="alert alert-info" style="text-align: left; max-width: 500px; margin: 20px auto;">
+        <h4 style="margin-bottom: 10px;">Next Steps:</h4>
+        <ol style="padding-left: 20px;">
+          <li style="margin-bottom: 8px;">Payment is required before preparation</li>
+          <li style="margin-bottom: 8px;">Please visit the front office to make payment</li>
+          <li style="margin-bottom: 8px;">Once paid, the kitchen will be notified</li>
+          <li>Your order will be prepared fresh for your event</li>
+        </ol>
+      </div>
+
+      <button class="btn" onclick="resetForm()" style="max-width: 300px; margin: 20px auto;">Place Another Order</button>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Loading Spinner -->
+  <div id="loading-spinner" class="loading-spinner">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+
+  <!-- Platter System -->
+  <script src="platter.js"></script>
+
+  <script>
+    // State
+    let menuItems = [];
+    let pricingConfig = [];
+    let currentPlatterType = 'finger-food';
+    let selectedItems = [];
+    let additionalPlatters = {};
+
+    // Load data on page load
+    window.addEventListener('DOMContentLoaded', async () => {
+      PlatterSystem.showLoading();
+      try {
+        menuItems = await PlatterSystem.loadMenuItems();
+        pricingConfig = await PlatterSystem.loadPricingConfig();
+
+        renderPricingInfo();
+        renderMenuItems();
+        renderAdditionalPlatters();
+        updateOrderSummary();
+        setMinDate();
+      } catch (error) {
+        console.error('Error loading data:', error);
+        PlatterSystem.showToast('Error loading menu. Please refresh the page.', 'error');
+      } finally {
+        PlatterSystem.hideLoading();
+      }
+    });
+
+    // Set minimum date to 7 days from now
+    function setMinDate() {
+      const dateInput = document.getElementById('order-date');
+      const minDate = new Date();
+      minDate.setDate(minDate.getDate() + 7);
+      dateInput.min = minDate.toISOString().split('T')[0];
+      dateInput.value = minDate.toISOString().split('T')[0];
+    }
+
+    // Render pricing information
+    function renderPricingInfo() {
+      const fingerFoodTiers = pricingConfig.filter(p => p.category === 'finger-food').sort((a, b) => a.itemCount - b.itemCount);
+      const gourmetTiers = pricingConfig.filter(p => p.category === 'gourmet').sort((a, b) => a.itemCount - b.itemCount);
+
+      // Update tab descriptions
+      if (fingerFoodTiers.length > 0) {
+        const desc = fingerFoodTiers.map(t => `${t.itemCount} items: $${t.pricePerPerson}/pp`).join(' • ');
+        document.getElementById('finger-food-pricing-desc').textContent = desc;
+      }
+
+      if (gourmetTiers.length > 0) {
+        const desc = gourmetTiers.map(t => `${t.itemCount} items: $${t.pricePerPerson}/pp`).join(' • ');
+        document.getElementById('gourmet-pricing-desc').textContent = desc;
+      }
+
+      // Render current pricing
+      updatePricingDisplay();
+    }
+
+    function updatePricingDisplay() {
+      const tiers = pricingConfig.filter(p => p.category === currentPlatterType).sort((a, b) => a.itemCount - b.itemCount);
+      const container = document.getElementById('pricing-info');
+
+      if (tiers.length === 0) {
+        container.innerHTML = '<p>No pricing configured for this platter type.</p>';
+        return;
+      }
+
+      container.innerHTML = `
+        <h4>Pricing (Minimum ${tiers[0].minPeople} people)</h4>
+        ${tiers.map(tier => `
+          <div class="pricing-tier">
+            <span>Select ${tier.itemCount} items</span>
+            <strong>$${tier.pricePerPerson.toFixed(2)} per person</strong>
+          </div>
+        `).join('')}
+      `;
+    }
+
+    // Select platter type
+    function selectPlatterType(type) {
+      currentPlatterType = type;
+      selectedItems = [];
+
+      // Update tabs
+      document.querySelectorAll('.platter-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.closest('.platter-tab').classList.add('active');
+
+      updatePricingDisplay();
+      renderMenuItems();
+      updateOrderSummary();
+    }
+
+    // Render menu items
+    function renderMenuItems() {
+      const container = document.getElementById('menu-items-container');
+      const items = menuItems.filter(item => item.category === currentPlatterType && item.enabled);
+
+      if (items.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No items available in this category yet.</p>';
+        return;
+      }
+
+      container.innerHTML = items.map(item => `
+        <div class="menu-item ${selectedItems.includes(item.id) ? 'selected' : ''}" onclick="toggleItem('${item.id}')">
+          <div class="menu-item-check">${selectedItems.includes(item.id) ? '✓' : ''}</div>
+          <div class="menu-item-name">${item.name}</div>
+        </div>
+      `).join('');
+    }
+
+    // Toggle item selection
+    function toggleItem(itemId) {
+      const index = selectedItems.indexOf(itemId);
+      if (index > -1) {
+        selectedItems.splice(index, 1);
+      } else {
+        selectedItems.push(itemId);
+      }
+
+      renderMenuItems();
+      updateOrderSummary();
+    }
+
+    // Render additional platters
+    function renderAdditionalPlatters() {
+      const container = document.getElementById('additional-platters-container');
+      const additionalItems = menuItems.filter(item => item.category === 'additional' && item.enabled);
+
+      if (additionalItems.length === 0) {
+        container.innerHTML = '<p style="color: #666;">No additional platters available at this time.</p>';
+        return;
+      }
+
+      // Initialize quantities
+      additionalItems.forEach(item => {
+        if (!(item.id in additionalPlatters)) {
+          additionalPlatters[item.id] = { item, quantity: 0 };
+        }
+      });
+
+      container.innerHTML = additionalItems.map(item => {
+        const quantity = additionalPlatters[item.id]?.quantity || 0;
+        // Price would need to be configured - for now using placeholder
+        const price = item.name.toLowerCase().includes('cake') ? 100 : 120;
+
+        return `
+          <div class="additional-item">
+            <div class="additional-item-info">
+              <h4>${item.name}</h4>
+              <p>$${price} (serves approximately 8 people)</p>
+            </div>
+            <div class="quantity-control">
+              <button class="quantity-btn" onclick="updateAdditional('${item.id}', ${price}, -1)" ${quantity === 0 ? 'disabled' : ''}>−</button>
+              <div class="quantity-display">${quantity}</div>
+              <button class="quantity-btn" onclick="updateAdditional('${item.id}', ${price}, 1)">+</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Update additional platter quantity
+    function updateAdditional(itemId, price, change) {
+      if (!additionalPlatters[itemId]) {
+        const item = menuItems.find(i => i.id === itemId);
+        additionalPlatters[itemId] = { item, quantity: 0, price };
+      }
+
+      additionalPlatters[itemId].quantity = Math.max(0, additionalPlatters[itemId].quantity + change);
+      additionalPlatters[itemId].price = price;
+
+      renderAdditionalPlatters();
+      updateOrderSummary();
+    }
+
+    // Update order summary
+    function updateOrderSummary() {
+      const container = document.getElementById('order-summary');
+      const instruction = document.getElementById('selection-instruction');
+      const numPeople = parseInt(document.getElementById('num-people').value) || 10;
+
+      if (selectedItems.length === 0) {
+        container.innerHTML = '<p style="color: #666; text-align: center;">Select your platter items to see summary</p>';
+        instruction.className = 'alert alert-warning';
+        instruction.textContent = 'Please select items to see pricing';
+        return;
+      }
+
+      // Calculate main platter pricing
+      const calculation = PlatterSystem.calculatePlatterPrice(pricingConfig, currentPlatterType, selectedItems.length, numPeople);
+
+      if (!calculation.valid) {
+        container.innerHTML = `<p style="color: #d32f2f; text-align: center;">${calculation.error}</p>`;
+        instruction.className = 'alert alert-error';
+        instruction.textContent = calculation.error;
+        return;
+      }
+
+      instruction.className = 'alert alert-success';
+      instruction.textContent = `Perfect! You've selected ${selectedItems.length} items at $${calculation.pricePerPerson}/person`;
+
+      // Calculate additional platters total
+      let additionalTotal = 0;
+      const additionalSummary = [];
+
+      Object.values(additionalPlatters).forEach(({ item, quantity, price }) => {
+        if (quantity > 0) {
+          const itemTotal = quantity * price;
+          additionalTotal += itemTotal;
+          additionalSummary.push({ name: item.name, quantity, price, total: itemTotal });
+        }
+      });
+
+      const total = calculation.subtotal + additionalTotal;
+
+      // Render summary
+      let html = '<h4>Order Details</h4>';
+
+      // Main platter
+      html += `
+        <div class="summary-item">
+          <span>${currentPlatterType === 'finger-food' ? 'Finger Food' : 'Gourmet Finger Food'} Platter (${selectedItems.length} items)</span>
+          <strong>$${calculation.subtotal.toFixed(2)}</strong>
+        </div>
+        <div style="padding-left: 20px; font-size: 0.9em; color: #666;">
+          ${numPeople} people × $${calculation.pricePerPerson.toFixed(2)} per person
+        </div>
+      `;
+
+      // Additional platters
+      if (additionalSummary.length > 0) {
+        additionalSummary.forEach(add => {
+          html += `
+            <div class="summary-item">
+              <span>${add.name} × ${add.quantity}</span>
+              <strong>$${add.total.toFixed(2)}</strong>
+            </div>
+          `;
+        });
+      }
+
+      html += `<div class="summary-total"><span>Total</span><span>$${total.toFixed(2)}</span></div>`;
+
+      container.innerHTML = html;
+    }
+
+    // Update summary when people count changes
+    document.getElementById('num-people').addEventListener('input', updateOrderSummary);
+
+    // Toggle booking ID field
+    document.getElementById('link-to-booking').addEventListener('change', (e) => {
+      document.getElementById('booking-id-group').classList.toggle('hidden', !e.target.checked);
+    });
+
+    // Submit order
+    async function submitOrder() {
+      const errors = [];
+
+      // Validate date
+      const orderDate = document.getElementById('order-date').value;
+      if (!orderDate) {
+        errors.push('Please select a delivery date');
+      } else {
+        const validation = PlatterSystem.validateOrderDate(orderDate);
+        if (!validation.valid) {
+          errors.push(validation.error);
+        }
+      }
+
+      // Validate delivery time
+      const deliveryTime = document.getElementById('delivery-time').value;
+      if (!deliveryTime) {
+        errors.push('Please select a delivery time');
+      }
+
+      // Validate people
+      const numPeople = parseInt(document.getElementById('num-people').value);
+      if (!numPeople || numPeople < 10) {
+        errors.push('Minimum 10 people required');
+      }
+
+      // Validate platter selection
+      if (selectedItems.length === 0) {
+        errors.push('Please select platter items');
+      } else {
+        const calculation = PlatterSystem.calculatePlatterPrice(pricingConfig, currentPlatterType, selectedItems.length, numPeople);
+        if (!calculation.valid) {
+          errors.push(calculation.error);
+        }
+      }
+
+      // Validate customer info
+      const name = document.getElementById('customer-name').value.trim();
+      if (!name) errors.push('Please enter your name');
+
+      const email = document.getElementById('customer-email').value.trim();
+      if (!email) errors.push('Please enter your email');
+
+      const phone = document.getElementById('customer-phone').value.trim();
+      if (!phone) errors.push('Please enter your phone number');
+
+      // Show errors if any
+      if (errors.length > 0) {
+        const errorContainer = document.getElementById('validation-errors');
+        errorContainer.innerHTML = `
+          <div class="alert alert-error">
+            <strong>Please fix the following errors:</strong>
+            <ul style="margin: 10px 0 0 20px;">
+              ${errors.map(e => `<li>${e}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+        errorContainer.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+
+      // Clear errors
+      document.getElementById('validation-errors').innerHTML = '';
+
+      // Calculate pricing
+      const calculation = PlatterSystem.calculatePlatterPrice(pricingConfig, currentPlatterType, selectedItems.length, numPeople);
+
+      // Calculate additional platters
+      const additionalPlattersList = [];
+      let additionalTotal = 0;
+
+      Object.values(additionalPlatters).forEach(({ item, quantity, price }) => {
+        if (quantity > 0) {
+          additionalPlattersList.push({
+            itemId: item.id,
+            name: item.name,
+            quantity,
+            priceEach: price,
+            total: quantity * price
+          });
+          additionalTotal += quantity * price;
+        }
+      });
+
+      const totalPrice = calculation.subtotal + additionalTotal;
+
+      // Build order data
+      const orderData = {
+        // Event details
+        date: orderDate,
+        deliveryTime: deliveryTime,
+
+        // Customer info
+        name: name,
+        email: email,
+        phone: phone,
+
+        // Platter details
+        platterType: currentPlatterType,
+        selectedItems: selectedItems,
+        numberOfPeople: numPeople,
+        pricePerPerson: calculation.pricePerPerson,
+        subtotal: calculation.subtotal,
+
+        // Additional platters
+        additionalPlatters: additionalPlattersList,
+        additionalTotal: additionalTotal,
+
+        // Total
+        totalPrice: totalPrice,
+
+        // Optional fields
+        linkedBookingId: document.getElementById('link-to-booking').checked ? document.getElementById('booking-id').value : null,
+        notes: document.getElementById('order-notes').value.trim(),
+
+        // Status
+        status: 'pending_payment',
+        cancelled: false,
+
+        // Timestamps
+        createdAt: new Date(),
+        orderNumber: PlatterSystem.generateOrderNumber()
+      };
+
+      // Submit order
+      PlatterSystem.showLoading();
+      const result = await PlatterSystem.createOrder(orderData);
+      PlatterSystem.hideLoading();
+
+      if (result.success) {
+        // Show success message
+        document.getElementById('success-order-number').textContent = `Order #${orderData.orderNumber}`;
+        document.getElementById('success-email').textContent = email;
+        document.getElementById('order-form').classList.add('hidden');
+        document.getElementById('success-container').classList.remove('hidden');
+        window.scrollTo(0, 0);
+      } else {
+        PlatterSystem.showToast('Failed to submit order. Please try again.', 'error');
+      }
+    }
+
+    // Reset form
+    function resetForm() {
+      document.getElementById('order-form').classList.remove('hidden');
+      document.getElementById('success-container').classList.add('hidden');
+
+      // Reset all fields
+      selectedItems = [];
+      additionalPlatters = {};
+      currentPlatterType = 'finger-food';
+
+      // Reset form inputs
+      document.getElementById('customer-name').value = '';
+      document.getElementById('customer-email').value = '';
+      document.getElementById('customer-phone').value = '';
+      document.getElementById('order-notes').value = '';
+      document.getElementById('num-people').value = '10';
+      document.getElementById('link-to-booking').checked = false;
+      document.getElementById('booking-id').value = '';
+      document.getElementById('booking-id-group').classList.add('hidden');
+
+      setMinDate();
+      renderMenuItems();
+      renderAdditionalPlatters();
+      updateOrderSummary();
+
+      window.scrollTo(0, 0);
+    }
+  </script>
+</body>
+</html>
