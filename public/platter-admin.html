@@ -387,7 +387,7 @@
         </div>
         <div class="user-info">
           <span id="user-email"></span>
-          <button onclick="auth.signOut()">Sign Out</button>
+          <button onclick="PlatterSystem.auth.signOut()">Sign Out</button>
           <button onclick="window.location.href='index.html'">Back to Calendar</button>
         </div>
       </div>
@@ -564,7 +564,7 @@
     let pricingConfig = [];
 
     // Auth State Observer
-    auth.onAuthStateChanged(async (user) => {
+    PlatterSystem.auth.onAuthStateChanged(async (user) => {
       // Hide loading state
       document.getElementById('loading-state').style.display = 'none';
 

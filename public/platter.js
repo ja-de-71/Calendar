@@ -15,7 +15,9 @@ const firebaseConfig = {
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
-const auth = firebase.auth();
+
+// Auth is optional (only needed for admin pages)
+const auth = firebase.auth ? firebase.auth() : null;
 const db = firebase.firestore();
 
 // Admin email - matches calendar admin
@@ -84,7 +86,7 @@ async function createMenuItem(itemData) {
     const docRef = await db.collection('platterMenuItems').add({
       ...itemData,
       createdAt: new Date(),
-      createdBy: auth.currentUser.email
+      createdBy: auth?.currentUser?.email || 'unknown'
     });
     return { success: true, id: docRef.id };
   } catch (error) {
@@ -98,7 +100,7 @@ async function updateMenuItem(itemId, itemData) {
     await db.collection('platterMenuItems').doc(itemId).update({
       ...itemData,
       updatedAt: new Date(),
-      updatedBy: auth.currentUser.email
+      updatedBy: auth?.currentUser?.email || 'unknown'
     });
     return { success: true };
   } catch (error) {
@@ -134,7 +136,7 @@ async function createPricingTier(tierData) {
     const docRef = await db.collection('platterPricingConfig').add({
       ...tierData,
       createdAt: new Date(),
-      createdBy: auth.currentUser.email
+      createdBy: auth?.currentUser?.email || 'unknown'
     });
     return { success: true, id: docRef.id };
   } catch (error) {
@@ -148,7 +150,7 @@ async function updatePricingTier(tierId, tierData) {
     await db.collection('platterPricingConfig').doc(tierId).update({
       ...tierData,
       updatedAt: new Date(),
-      updatedBy: auth.currentUser.email
+      updatedBy: auth?.currentUser?.email || 'unknown'
     });
     return { success: true };
   } catch (error) {
@@ -332,5 +334,9 @@ window.PlatterSystem = {
   hideLoading,
 
   // Constants
-  ADMIN_EMAIL
+  ADMIN_EMAIL,
+
+  // Firebase (for admin pages)
+  auth,
+  db
 };
