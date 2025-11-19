@@ -19,7 +19,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // Admin email - matches calendar admin
-const ADMIN_EMAIL = 'jody.andrews@portlandmemorialbowls.co.nz';
+const ADMIN_EMAIL = 'jason.dean192@googlemail.com';
 
 // === HELPER FUNCTIONS === //
 
