@@ -362,15 +362,22 @@
   </style>
 </head>
 <body>
+  <!-- Loading State -->
+  <div id="loading-state" style="display: flex; align-items: center; justify-content: center; height: 100vh; flex-direction: column;">
+    <div class="spinner"></div>
+    <p style="margin-top: 20px; color: #666;">Loading platter administration...</p>
+  </div>
+
   <!-- Auth Container -->
-  <div id="auth-container">
+  <div id="auth-container" style="display: none;">
     <h2>Access Denied</h2>
     <p>You must be logged in as an administrator to access this page.</p>
+    <p>Current user: <span id="current-user-email">Not logged in</span></p>
     <p><a href="index.html">Go to Main Calendar</a></p>
   </div>
 
   <!-- Main App -->
-  <div id="app">
+  <div id="app" style="display: none;">
     <div class="container">
       <!-- Header -->
       <div class="header">
@@ -558,7 +565,14 @@
 
     // Auth State Observer
     auth.onAuthStateChanged(async (user) => {
+      // Hide loading state
+      document.getElementById('loading-state').style.display = 'none';
+
+      console.log('Auth state changed:', user ? user.email : 'No user');
+      console.log('Admin email:', PlatterSystem.ADMIN_EMAIL);
+
       if (user && user.email === PlatterSystem.ADMIN_EMAIL) {
+        // Admin user - show app
         document.getElementById('auth-container').style.display = 'none';
         document.getElementById('app').style.display = 'block';
         document.getElementById('user-email').textContent = user.email;
@@ -566,8 +580,15 @@
         // Load data
         await loadAllData();
       } else {
-        document.getElementById('auth-container').style.display = 'block';
+        // Not admin or not logged in
         document.getElementById('app').style.display = 'none';
+        document.getElementById('auth-container').style.display = 'block';
+
+        if (user) {
+          document.getElementById('current-user-email').textContent = user.email;
+        } else {
+          document.getElementById('current-user-email').textContent = 'Not logged in';
+        }
       }
     });
 
