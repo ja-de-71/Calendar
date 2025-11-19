@@ -16,5 +16,24 @@ service cloud.firestore {
         allow read: if true;
         allow create, delete: if request.auth != null;
     }
+
+    // Platter menu items - readable by anyone, writable by authenticated users
+    match /platterMenuItems/{itemId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
+    }
+
+    // Platter pricing config - readable by anyone, writable by authenticated users
+    match /platterPricingConfig/{configId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
+    }
+
+    // Platter orders - anyone can create (public ordering), authenticated users can read/update
+    match /platterOrders/{orderId} {
+      allow read: if request.auth != null;
+      allow create: if true;
+      allow update, delete: if request.auth != null;
+    }
   }
 }

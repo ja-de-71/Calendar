@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platter Admin - Portland Memorial Bowls</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0059c4 0%, #0078d4 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 1.8em;
+    }
+
+    .header .user-info {
+      font-size: 0.9em;
+    }
+
+    .header button {
+      background-color: rgba(255,255,255,0.2);
+      color: white;
+      border: 1px solid white;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .header button:hover {
+      background-color: rgba(255,255,255,0.3);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-button {
+      padding: 12px 24px;
+      background-color: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      font-size: 1em;
+      transition: all 0.3s;
+    }
+
+    .tab-button.active {
+      background-color: #0059c4;
+      color: white;
+      border-color: #0059c4;
+    }
+
+    .tab-content {
+      display: none;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .section-header h2 {
+      color: #0059c4;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      background-color: #0059c4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #0078d4;
+    }
+
+    .btn-danger {
+      background-color: #d32f2f;
+    }
+
+    .btn-danger:hover {
+      background-color: #c62828;
+    }
+
+    .btn-secondary {
+      background-color: #757575;
+    }
+
+    .btn-secondary:hover {
+      background-color: #616161;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    th {
+      background-color: #f5f5f5;
+      font-weight: bold;
+      color: #0059c4;
+    }
+
+    tr:hover {
+      background-color: #f9f9f9;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-weight: bold;
+    }
+
+    .badge-finger-food {
+      background-color: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .badge-gourmet {
+      background-color: #f3e5f5;
+      color: #7b1fa2;
+    }
+
+    .badge-additional {
+      background-color: #fff3e0;
+      color: #f57c00;
+    }
+
+    .badge-enabled {
+      background-color: #c8e6c9;
+      color: #2e7d32;
+    }
+
+    .badge-disabled {
+      background-color: #ffcdd2;
+      color: #c62828;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .modal-header h3 {
+      color: #0059c4;
+    }
+
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .close-button:hover {
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #0059c4;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      z-index: 2000;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .toast.success {
+      background-color: #4caf50;
+    }
+
+    .toast.error {
+      background-color: #f44336;
+    }
+
+    .loading-spinner {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 3000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #0059c4;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+    }
+
+    .action-buttons button {
+      padding: 6px 12px;
+      font-size: 0.85em;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+
+    .empty-state h3 {
+      margin-bottom: 10px;
+    }
+
+    #auth-container {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+
+    #app {
+      display: none;
+    }
+
+    .info-box {
+      background-color: #e3f2fd;
+      border-left: 4px solid #1976d2;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+
+    .info-box strong {
+      color: #1976d2;
+    }
+  </style>
+</head>
+<body>
+  <!-- Auth Container -->
+  <div id="auth-container">
+    <h2>Access Denied</h2>
+    <p>You must be logged in as an administrator to access this page.</p>
+    <p><a href="index.html">Go to Main Calendar</a></p>
+  </div>
+
+  <!-- Main App -->
+  <div id="app">
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <div>
+          <h1>🍽️ Platter Administration</h1>
+          <p>Manage menu items and pricing configuration</p>
+        </div>
+        <div class="user-info">
+          <span id="user-email"></span>
+          <button onclick="auth.signOut()">Sign Out</button>
+          <button onclick="window.location.href='index.html'">Back to Calendar</button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-button active" onclick="switchTab('menu-items')">Menu Items</button>
+        <button class="tab-button" onclick="switchTab('pricing')">Pricing Configuration</button>
+      </div>
+
+      <!-- Menu Items Tab -->
+      <div id="menu-items-tab" class="tab-content active">
+        <div class="section-header">
+          <h2>Menu Items</h2>
+          <button class="btn" onclick="openMenuItemModal()">+ Add Menu Item</button>
+        </div>
+
+        <div class="info-box">
+          <strong>Menu Management:</strong> Add, edit, or disable menu items. Items can be assigned to categories (Finger Food, Gourmet Finger Food, or Additional Platters).
+        </div>
+
+        <table id="menu-items-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Sort Order</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="menu-items-body">
+            <tr>
+              <td colspan="5" class="empty-state">
+                <h3>No menu items found</h3>
+                <p>Click "Add Menu Item" to create your first item</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pricing Tab -->
+      <div id="pricing-tab" class="tab-content">
+        <div class="section-header">
+          <h2>Pricing Configuration</h2>
+          <button class="btn" onclick="openPricingModal()">+ Add Pricing Tier</button>
+        </div>
+
+        <div class="info-box">
+          <strong>Pricing Tiers:</strong> Configure per-person pricing based on platter type and number of items selected. For example: "Finger Food with 6 items = $25 per person".
+        </div>
+
+        <table id="pricing-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Item Count</th>
+              <th>Price per Person</th>
+              <th>Min People</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="pricing-body">
+            <tr>
+              <td colspan="5" class="empty-state">
+                <h3>No pricing tiers configured</h3>
+                <p>Click "Add Pricing Tier" to create your first tier</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu Item Modal -->
+  <div id="menu-item-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="menu-modal-title">Add Menu Item</h3>
+        <button class="close-button" onclick="closeMenuItemModal()">&times;</button>
+      </div>
+      <form id="menu-item-form">
+        <div class="form-group">
+          <label for="item-name">Item Name *</label>
+          <input type="text" id="item-name" required>
+        </div>
+        <div class="form-group">
+          <label for="item-category">Category *</label>
+          <select id="item-category" required>
+            <option value="">Select category...</option>
+            <option value="finger-food">Finger Food</option>
+            <option value="gourmet">Gourmet Finger Food</option>
+            <option value="additional">Additional Platters</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="item-sort-order">Sort Order</label>
+          <input type="number" id="item-sort-order" min="1" value="1">
+        </div>
+        <div class="form-group">
+          <label for="item-enabled">
+            <input type="checkbox" id="item-enabled" checked style="width: auto; margin-right: 5px;">
+            Enabled (available for ordering)
+          </label>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn">Save Menu Item</button>
+          <button type="button" class="btn btn-secondary" onclick="closeMenuItemModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Pricing Modal -->
+  <div id="pricing-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="pricing-modal-title">Add Pricing Tier</h3>
+        <button class="close-button" onclick="closePricingModal()">&times;</button>
+      </div>
+      <form id="pricing-form">
+        <div class="form-group">
+          <label for="pricing-category">Platter Category *</label>
+          <select id="pricing-category" required>
+            <option value="">Select category...</option>
+            <option value="finger-food">Finger Food</option>
+            <option value="gourmet">Gourmet Finger Food</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="pricing-item-count">Number of Items Selected *</label>
+          <input type="number" id="pricing-item-count" min="1" max="20" required>
+          <small>How many items must be selected for this price tier?</small>
+        </div>
+        <div class="form-group">
+          <label for="pricing-per-person">Price per Person ($) *</label>
+          <input type="number" id="pricing-per-person" min="1" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label for="pricing-min-people">Minimum People *</label>
+          <input type="number" id="pricing-min-people" min="1" value="10" required>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn">Save Pricing Tier</button>
+          <button type="button" class="btn btn-secondary" onclick="closePricingModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Loading Spinner -->
+  <div id="loading-spinner" class="loading-spinner">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+
+  <!-- Platter System -->
+  <script src="platter.js"></script>
+
+  <script>
+    // State
+    let currentEditItemId = null;
+    let currentEditPricingId = null;
+    let menuItems = [];
+    let pricingConfig = [];
+
+    // Auth State Observer
+    auth.onAuthStateChanged(async (user) => {
+      if (user && user.email === PlatterSystem.ADMIN_EMAIL) {
+        document.getElementById('auth-container').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        document.getElementById('user-email').textContent = user.email;
+
+        // Load data
+        await loadAllData();
+      } else {
+        document.getElementById('auth-container').style.display = 'block';
+        document.getElementById('app').style.display = 'none';
+      }
+    });
+
+    // === DATA LOADING === //
+
+    async function loadAllData() {
+      PlatterSystem.showLoading();
+      try {
+        menuItems = await PlatterSystem.loadMenuItems();
+        pricingConfig = await PlatterSystem.loadPricingConfig();
+        renderMenuItems();
+        renderPricingConfig();
+      } finally {
+        PlatterSystem.hideLoading();
+      }
+    }
+
+    // === TAB SWITCHING === //
+
+    function switchTab(tabName) {
+      // Update tab buttons
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // Update tab content
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(`${tabName}-tab`).classList.add('active');
+    }
+
+    // === MENU ITEMS === //
+
+    function renderMenuItems() {
+      const tbody = document.getElementById('menu-items-body');
+
+      if (menuItems.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="empty-state">
+              <h3>No menu items found</h3>
+              <p>Click "Add Menu Item" to create your first item</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = menuItems.map(item => {
+        const categoryBadge = item.category === 'finger-food' ? 'badge-finger-food' :
+                             item.category === 'gourmet' ? 'badge-gourmet' : 'badge-additional';
+        const categoryLabel = item.category === 'finger-food' ? 'Finger Food' :
+                             item.category === 'gourmet' ? 'Gourmet' : 'Additional';
+        const statusBadge = item.enabled ? 'badge-enabled' : 'badge-disabled';
+        const statusLabel = item.enabled ? 'Enabled' : 'Disabled';
+
+        return `
+          <tr>
+            <td>${item.name}</td>
+            <td><span class="badge ${categoryBadge}">${categoryLabel}</span></td>
+            <td>${item.sortOrder}</td>
+            <td><span class="badge ${statusBadge}">${statusLabel}</span></td>
+            <td class="action-buttons">
+              <button class="btn" onclick="editMenuItem('${item.id}')">Edit</button>
+              <button class="btn btn-danger" onclick="deleteMenuItemConfirm('${item.id}')">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openMenuItemModal(itemId = null) {
+      currentEditItemId = itemId;
+      const modal = document.getElementById('menu-item-modal');
+      const title = document.getElementById('menu-modal-title');
+
+      if (itemId) {
+        const item = menuItems.find(i => i.id === itemId);
+        title.textContent = 'Edit Menu Item';
+        document.getElementById('item-name').value = item.name;
+        document.getElementById('item-category').value = item.category;
+        document.getElementById('item-sort-order').value = item.sortOrder;
+        document.getElementById('item-enabled').checked = item.enabled;
+      } else {
+        title.textContent = 'Add Menu Item';
+        document.getElementById('menu-item-form').reset();
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeMenuItemModal() {
+      document.getElementById('menu-item-modal').style.display = 'none';
+      currentEditItemId = null;
+    }
+
+    function editMenuItem(itemId) {
+      openMenuItemModal(itemId);
+    }
+
+    async function deleteMenuItemConfirm(itemId) {
+      const item = menuItems.find(i => i.id === itemId);
+      if (!confirm(`Are you sure you want to delete "${item.name}"?`)) return;
+
+      PlatterSystem.showLoading();
+      const result = await PlatterSystem.deleteMenuItem(itemId);
+      PlatterSystem.hideLoading();
+
+      if (result.success) {
+        PlatterSystem.showToast('Menu item deleted successfully');
+        await loadAllData();
+      } else {
+        PlatterSystem.showToast('Failed to delete menu item', 'error');
+      }
+    }
+
+    document.getElementById('menu-item-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const itemData = {
+        name: document.getElementById('item-name').value.trim(),
+        category: document.getElementById('item-category').value,
+        sortOrder: parseInt(document.getElementById('item-sort-order').value),
+        enabled: document.getElementById('item-enabled').checked
+      };
+
+      PlatterSystem.showLoading();
+      let result;
+
+      if (currentEditItemId) {
+        result = await PlatterSystem.updateMenuItem(currentEditItemId, itemData);
+      } else {
+        result = await PlatterSystem.createMenuItem(itemData);
+      }
+
+      PlatterSystem.hideLoading();
+
+      if (result.success) {
+        PlatterSystem.showToast(currentEditItemId ? 'Menu item updated' : 'Menu item created');
+        closeMenuItemModal();
+        await loadAllData();
+      } else {
+        PlatterSystem.showToast('Failed to save menu item', 'error');
+      }
+    });
+
+    // === PRICING CONFIG === //
+
+    function renderPricingConfig() {
+      const tbody = document.getElementById('pricing-body');
+
+      if (pricingConfig.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="empty-state">
+              <h3>No pricing tiers configured</h3>
+              <p>Click "Add Pricing Tier" to create your first tier</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      // Sort by category and item count
+      const sorted = [...pricingConfig].sort((a, b) => {
+        if (a.category !== b.category) return a.category.localeCompare(b.category);
+        return a.itemCount - b.itemCount;
+      });
+
+      tbody.innerHTML = sorted.map(tier => {
+        const categoryBadge = tier.category === 'finger-food' ? 'badge-finger-food' : 'badge-gourmet';
+        const categoryLabel = tier.category === 'finger-food' ? 'Finger Food' : 'Gourmet';
+
+        return `
+          <tr>
+            <td><span class="badge ${categoryBadge}">${categoryLabel}</span></td>
+            <td>${tier.itemCount} items</td>
+            <td>$${tier.pricePerPerson.toFixed(2)}</td>
+            <td>${tier.minPeople} people</td>
+            <td class="action-buttons">
+              <button class="btn" onclick="editPricingTier('${tier.id}')">Edit</button>
+              <button class="btn btn-danger" onclick="deletePricingTierConfirm('${tier.id}')">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openPricingModal(tierId = null) {
+      currentEditPricingId = tierId;
+      const modal = document.getElementById('pricing-modal');
+      const title = document.getElementById('pricing-modal-title');
+
+      if (tierId) {
+        const tier = pricingConfig.find(t => t.id === tierId);
+        title.textContent = 'Edit Pricing Tier';
+        document.getElementById('pricing-category').value = tier.category;
+        document.getElementById('pricing-item-count').value = tier.itemCount;
+        document.getElementById('pricing-per-person').value = tier.pricePerPerson;
+        document.getElementById('pricing-min-people').value = tier.minPeople;
+      } else {
+        title.textContent = 'Add Pricing Tier';
+        document.getElementById('pricing-form').reset();
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closePricingModal() {
+      document.getElementById('pricing-modal').style.display = 'none';
+      currentEditPricingId = null;
+    }
+
+    function editPricingTier(tierId) {
+      openPricingModal(tierId);
+    }
+
+    async function deletePricingTierConfirm(tierId) {
+      if (!confirm('Are you sure you want to delete this pricing tier?')) return;
+
+      PlatterSystem.showLoading();
+      const result = await PlatterSystem.deletePricingTier(tierId);
+      PlatterSystem.hideLoading();
+
+      if (result.success) {
+        PlatterSystem.showToast('Pricing tier deleted successfully');
+        await loadAllData();
+      } else {
+        PlatterSystem.showToast('Failed to delete pricing tier', 'error');
+      }
+    }
+
+    document.getElementById('pricing-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const tierData = {
+        category: document.getElementById('pricing-category').value,
+        itemCount: parseInt(document.getElementById('pricing-item-count').value),
+        pricePerPerson: parseFloat(document.getElementById('pricing-per-person').value),
+        minPeople: parseInt(document.getElementById('pricing-min-people').value)
+      };
+
+      PlatterSystem.showLoading();
+      let result;
+
+      if (currentEditPricingId) {
+        result = await PlatterSystem.updatePricingTier(currentEditPricingId, tierData);
+      } else {
+        result = await PlatterSystem.createPricingTier(tierData);
+      }
+
+      PlatterSystem.hideLoading();
+
+      if (result.success) {
+        PlatterSystem.showToast(currentEditPricingId ? 'Pricing tier updated' : 'Pricing tier created');
+        closePricingModal();
+        await loadAllData();
+      } else {
+        PlatterSystem.showToast('Failed to save pricing tier', 'error');
+      }
+    });
+
+    // Close modals on click outside
+    window.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal')) {
+        e.target.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
