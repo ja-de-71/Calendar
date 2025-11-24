@@ -154,8 +154,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const blackoutsSnapshot = await db.collection('blackouts').get();
     blackouts = blackoutsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
+
     renderCalendar();
+  }
+
+  // --- PUBLIC DAY SUMMARY SYNC --- //
+  // Updates the public-facing calendar data (anonymized)
+  async function updatePublicDaySummary(date) {
+    try {
+      // Get all non-cancelled bookings for this date
+      const dayBookings = bookings.filter(b =>
+        b.date === date && !b.cancelled
+      );
+
+      if (dayBookings.length === 0) {
+        // No bookings - delete the public summary for this day
+        await db.collection('publicDaySummary').doc(date).delete();
+      } else {
+        // Create safe public data (no names, phones, emails)
+        const publicData = {
+          date: date,
+          bookings: dayBookings.map(b => ({
+            startTime: b.startTime,
+            endTime: b.endTime,
+            rinks: b.rinks,
+            label: b.notes || 'Booking'  // Use notes as the public label
+          }))
+        };
+
+        await db.collection('publicDaySummary').doc(date).set(publicData);
+      }
+    } catch (error) {
+      console.error('Error updating public day summary:', error);
+    }
   }
 
   function showBookingModal(date) {
@@ -245,7 +276,9 @@ document.addEventListener('DOMContentLoaded', function() {
         await db.collection('bookings').add(bookingData);
       }
       resetForm();
-      loadAllData();
+      await loadAllData();
+      // Update public calendar with safe anonymized data
+      await updatePublicDaySummary(bookingData.date);
     } catch (error) {
       console.error("Error saving document: ", error);
       alert('Failed to save booking.');
@@ -290,13 +323,18 @@ document.addEventListener('DOMContentLoaded', function() {
       const cancellerName = prompt('To confirm cancellation, please enter your full name:');
       if (cancellerName && cancellerName.trim().length > 1) {
         try {
+          const bookingToCancel = bookings.find(b => b.id === bookingId);
           await db.collection('bookings').doc(bookingId).update({
               cancelled: true,
               cancelledBy: cancellerName.trim(),
               cancelledAt: new Date()
           });
           bookingModal.style.display = 'none';
-          loadAllData();
+          await loadAllData();
+          // Update public calendar to remove cancelled booking
+          if (bookingToCancel) {
+            await updatePublicDaySummary(bookingToCancel.date);
+          }
         } catch (error) {
           console.error('Error cancelling booking:', error);
           alert('Failed to cancel booking.');
