@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let bookings = [];
   let blackouts = []; // For storing blackout dates
   let currentEditId = null;
+  let uiStarted = false; // Track if FirebaseUI has been started
 
   // FirebaseUI config
   const ui = new firebaseui.auth.AuthUI(auth);
@@ -78,7 +79,11 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       app.style.display = 'none';
       authContainer.style.display = 'block';
-      ui.start('#firebaseui-auth-container', uiConfig);
+      // Only start FirebaseUI once to avoid repeated initialization
+      if (!uiStarted) {
+        ui.start('#firebaseui-auth-container', uiConfig);
+        uiStarted = true;
+      }
     }
   });
 
